@@ -1,0 +1,42 @@
+{
+  "name": "doubledoublegood",
+  "version": "1.0.0",
+  "description": "Static Next.js brochure site for Double Double Good Music Emporium.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "playwright test"
+  },
+  "keywords": [
+    "nextjs",
+    "tailwindcss",
+    "stafford",
+    "record-shop"
+  ],
+  "author": "OpenAI Codex",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "next": "^16.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.2",
+    "@playwright/test": "^1.59.1",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.4",
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.3"
+  }
+}
