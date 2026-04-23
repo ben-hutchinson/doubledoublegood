@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 
+import { ImageCarousel } from '@/components/image-carousel';
 import { PageShell } from '@/components/page-shell';
 import { createPageMetadata } from '@/lib/metadata';
-import { aboutContent, aboutHighlights } from '@/lib/site-content';
+import { aboutContent, carouselItems } from '@/lib/site-content';
 
 export const metadata: Metadata = createPageMetadata(
   'About',
@@ -19,29 +21,23 @@ export default function AboutPage() {
             <h2 className="heading-section text-2xl font-black text-stone-950 uppercase sm:text-3xl">
               {aboutContent.shopHeading}
             </h2>
-            <p className="heading-sub text-xs font-bold text-stone-500 uppercase">
-              {aboutContent.shopSubheading}
-            </p>
+            {aboutContent.shopSubheading ? (
+              <p className="heading-sub text-xs font-bold text-stone-500 uppercase">
+                {aboutContent.shopSubheading}
+              </p>
+            ) : null}
           </header>
-          <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
-            <div className="flex min-h-[24rem] items-end rounded-[1.1rem] border border-stone-900/35 bg-[linear-gradient(135deg,rgba(24,18,15,0.08),rgba(186,43,32,0.14))] p-6">
-              <ul className="grid w-full gap-4 sm:grid-cols-2">
-                {aboutHighlights.map((item) => (
-                  <li
-                    key={item.label}
-                    className="rounded-2xl border border-stone-900/15 bg-[color:var(--panel)] p-4 shadow-[var(--shadow)]"
-                  >
-                    <p className="label-with-icon text-xs font-bold tracking-[0.2em] text-stone-500 uppercase">
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-base leading-7 text-stone-800">
-                      {item.value}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-start">
+            <ImageCarousel
+              className="rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3"
+              imageClassName="h-[22rem] sm:h-[26rem]"
+              items={carouselItems}
+              showTopBorder={false}
+            />
             <article className="space-y-4">
+              <p className="heading-sub text-xs font-bold text-stone-500 uppercase">
+                {aboutContent.shopLead}
+              </p>
               <div className="measure space-y-4 text-base leading-7 text-stone-700">
                 {aboutContent.shopParagraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
@@ -56,24 +52,24 @@ export default function AboutPage() {
             <h2 className="heading-section text-2xl font-black text-stone-950 uppercase sm:text-3xl">
               {aboutContent.ownerHeading}
             </h2>
-            <p className="heading-sub text-xs font-bold text-stone-500 uppercase">
-              {aboutContent.ownerSubheading}
-            </p>
           </header>
-          <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-            <article className="measure space-y-4 text-base leading-7 text-stone-700">
-              {aboutContent.ownerParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+            <article className="space-y-4">
+              <div className="measure space-y-4 text-base leading-7 text-stone-700">
+                {aboutContent.ownerParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
             </article>
-            <div className="media-zoom flex min-h-[20rem] items-center justify-center rounded-[1.1rem] border border-dashed border-stone-900/35 bg-stone-100 p-6">
-              <div className="text-center">
-                <p className="heading-sub text-xs font-bold text-stone-600 uppercase">
-                  Owner image
-                </p>
-                <p className="mt-3 text-base leading-7 text-stone-700">
-                  Portrait placeholder for this section.
-                </p>
+            <div className="rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3">
+              <div className="media-zoom relative h-[22rem] overflow-hidden rounded-[1.2rem] border border-stone-900/12 bg-stone-100 sm:h-[26rem]">
+                <Image
+                  fill
+                  alt={aboutContent.ownerImage.alt}
+                  className="absolute inset-0 h-full w-full object-cover object-[50%_24%]"
+                  sizes="(min-width: 1024px) 52vw, 100vw"
+                  src={aboutContent.ownerImage.src}
+                />
               </div>
             </div>
           </div>

@@ -16,15 +16,16 @@ export default function ContactPage() {
   return (
     <PageShell title={contactContent.title}>
       <div className="grid gap-5 lg:grid-cols-[0.95fr_1.2fr]">
-        <ContentCard title="Get In Touch">
-          {contactContent.cards.map((card) => (
-            <div key={card.label}>
-              <p className="heading-sub label-with-icon text-sm font-bold text-stone-500 uppercase">
-                {card.label}
-              </p>
-              <p className="measure mt-2 whitespace-pre-line">{card.value}</p>
-            </div>
+        <ContentCard title={contactContent.getInTouchHeading}>
+          {contactContent.paragraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
           ))}
+          <ul className="list-disc space-y-3 pl-5">
+            {contactContent.options.map((option) => (
+              <li key={option}>{option}</li>
+            ))}
+          </ul>
+          <p>{contactContent.outro}</p>
         </ContentCard>
         <div>
           <p className="heading-section mb-4 text-lg font-black text-stone-950 uppercase">

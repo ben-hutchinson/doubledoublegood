@@ -24,33 +24,32 @@ Pages
 Home
 Header with clickable logo + nav
 Hero headline: "Stafford's Independent Record Shop"
-Minimal intro copy
-New arrivals carousel (placeholder data initially)
+Main "What we do" content block covering stock and buying
+Featured shopfront image panel
+Embedded "New stock" Instagram reel panel
 Social links in header
 Footer with delivery/returns link, privacy policy link, newsletter signup, and repeated footer nav
 About
 Shop story
-Founded 7 years ago on Mill Street
-Moved to current location
-Independent business built by a vinyl lover
-Placeholder image area
+Founded from a market stall in 2019
+Moved to Mill Street, then to the current Ancient High House location
+Owner section with supporting image
+Owner bio copy can remain temporary until final approved text is supplied
 Find Us
 Address: 49 Greengate Street, Stafford, ST16 2JA
 Embedded Google Map
 "Get directions" button
-Opening hours: Tue–Sat, 10am–5pm
+Opening hours displayed in global footer
 Parking guidance: local to any Stafford Town Centre car park
 5 minute walk from Stafford train station or bus station
 Sell
-Bring records in for condition assessment
-Home collection visits available by arrangement
-Contact first for collections
-We buy all genres/styles
+Present owner-approved copy and buying categories
+Keep page focused on simple guidance for bringing records in and making contact
 Contact
 Phone: 01785 562657
 Email: thedoublegood@gmail.com
 Contact form with fields: name, email, phone (optional), message
-Form sends to email inbox only
+Form submits to the Formspree endpoint configured in site content and delivers enquiries to the shop inbox
 Success message: "Thanks, we'll get back to you soon"
 Preferred response via email/form
 Reviews
@@ -58,8 +57,7 @@ Google Reviews widget/embed
 
 ## Reviews Integration
 
-The Reviews page must display a live embedded Google Reviews widget using a provider selected during implementation. The solution should prioritize reliability, responsive performance, minimal visual branding, and easy maintenance. Include a primary CTA button labelled **Leave Us a Review** linking to `https://g.page/r/CWoEdNqtQf5CEAE/review`. If the widget provider changes in future, the page layout and CTA should remain unchanged.
-CTA to leave a review
+The Reviews page must display a live embedded Google Reviews widget using a provider selected during implementation. The solution should prioritize reliability, responsive performance, minimal visual branding, and easy maintenance. The "Leave a review" action is provided within the embedded widget itself. If the widget provider changes in future, keep the page layout stable and preserve an obvious review action.
 Delivery & Returns
 Static policy page
 Informational only for V1

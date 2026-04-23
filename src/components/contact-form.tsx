@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { businessDetails } from '@/lib/site-content';
+import { integrationSettings } from '@/lib/site-content';
 
 type FormState = 'idle' | 'success' | 'error';
 
@@ -24,6 +24,7 @@ export function ContactForm() {
   const [values, setValues] = useState<FormValues>(initialValues);
   const [state, setState] = useState<FormState>('idle');
   const [feedback, setFeedback] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function updateField<Key extends keyof FormValues>(
     key: Key,
@@ -32,8 +33,9 @@ export function ContactForm() {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
 
     if (!values.name.trim() || !values.email.trim() || !values.message.trim()) {
       setState('error');
@@ -41,23 +43,74 @@ export function ContactForm() {
       return;
     }
 
-    const subject = encodeURIComponent('Website contact form enquiry');
-    const body = encodeURIComponent(
-      [
-        `Name: ${values.name.trim()}`,
-        `Email: ${values.email.trim()}`,
-        `Phone: ${values.phone.trim() || 'Not provided'}`,
-        '',
-        'Message:',
-        values.message.trim(),
-      ].join('\n'),
-    );
+    const endpoint = integrationSettings.contactFormEndpoint.trim();
+    const formData = new FormData(formElement);
+    const honeypot = String(formData.get('company') ?? '').trim();
 
-    window.location.href = `${businessDetails.emailHref}?subject=${subject}&body=${body}`;
+    if (honeypot) {
+      setState('success');
+      setFeedback("Thanks, we'll get back to you soon.");
+      setValues(initialValues);
+      return;
+    }
 
-    setState('success');
-    setFeedback('Opening your email app with your message prefilled.');
-    setValues(initialValues);
+    if (!endpoint) {
+      setState('error');
+      setFeedback(
+        'Contact form is temporarily unavailable right now. Please call or email the shop directly.',
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    setState('idle');
+    setFeedback('');
+
+    try {
+      const payload = {
+        name: values.name.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim() || '',
+        message: values.message.trim(),
+        _subject: 'Website contact form enquiry',
+        _replyto: values.email.trim(),
+        source: 'website-contact-form',
+      };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response
+          .json()
+          .catch(() => ({ errors: [] as Array<{ message?: string }> }));
+        const providerMessage = errorBody.errors?.[0]?.message;
+        throw new Error(
+          providerMessage ||
+            'Something went wrong sending your message. Please call or email the shop directly.',
+        );
+      }
+
+      setState('success');
+      setFeedback("Thanks, we'll get back to you soon.");
+      setValues(initialValues);
+      formElement.reset();
+    } catch (error) {
+      setState('error');
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong sending your message. Please call or email the shop directly.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -143,9 +196,10 @@ export function ContactForm() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           className="heading-section pressable inline-flex min-h-12 items-center justify-center rounded-2xl bg-stone-950 px-6 text-sm font-bold text-stone-50 uppercase hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={isSubmitting}
           type="submit"
         >
-          Send Message
+          {isSubmitting ? 'Sending...' : 'Send Message'}
         </button>
         {feedback ? (
           <p

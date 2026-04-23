@@ -1,9 +1,10 @@
-import { ImageCarousel } from '@/components/image-carousel';
+import Image from 'next/image';
+
+import { ContentCard } from '@/components/content-card';
 import { InstagramReelPanel } from '@/components/instagram-reel-panel';
 import {
   businessDetails,
-  carouselItems,
-  homeIntro,
+  homeWhatWeDo,
   integrationSettings,
 } from '@/lib/site-content';
 
@@ -12,20 +13,42 @@ export default function HomePage() {
     <section className="space-y-10 py-2 lg:space-y-12 lg:py-4">
       <h1 className="sr-only">{businessDetails.name}</h1>
       <div className="surface-stack space-y-8">
-        <section className="space-y-4">
-          <p className="measure max-w-3xl text-lg leading-8 text-stone-800">
-            {homeIntro.paragraphs[0]}
-          </p>
-          <p className="measure max-w-3xl text-base leading-7 text-stone-700">
-            {homeIntro.paragraphs[1]}
-          </p>
-        </section>
         <section>
-          <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
-            <ImageCarousel items={carouselItems} />
-            <InstagramReelPanel
-              embedUrl={integrationSettings.instagramReelEmbedUrl}
-            />
+          <div className="grid gap-6 xl:grid-cols-[1.03fr_0.97fr] xl:items-stretch">
+            <div className="space-y-4 xl:flex xl:h-full xl:flex-col">
+              <ContentCard title={homeWhatWeDo.heading}>
+                <p>{homeWhatWeDo.intro}</p>
+                <p className="heading-sub text-xs font-bold text-stone-500 uppercase">
+                  {homeWhatWeDo.stockHeading}
+                </p>
+                <ul className="list-disc space-y-3 pl-5">
+                  {homeWhatWeDo.stockItems.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <p>{homeWhatWeDo.buyParagraph}</p>
+                <p>{homeWhatWeDo.closing}</p>
+              </ContentCard>
+              <InstagramReelPanel
+                className="rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3 xl:flex-1"
+                embedMinHeightClass="min-h-[24rem] sm:min-h-[28rem] xl:min-h-0"
+                embedUrl={integrationSettings.instagramReelEmbedUrl}
+                fillAvailableHeight
+                heading="New stock"
+                showTopBorder={false}
+              />
+            </div>
+
+            <div className="media-zoom rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3 shadow-[var(--shadow)] xl:h-full">
+              <Image
+                alt={homeWhatWeDo.shopfrontImage.alt}
+                className="h-full min-h-[30rem] w-full rounded-[0.9rem] object-cover object-center xl:min-h-full"
+                height={homeWhatWeDo.shopfrontImage.height}
+                sizes="(min-width: 1280px) 44vw, 100vw"
+                src={homeWhatWeDo.shopfrontImage.src}
+                width={homeWhatWeDo.shopfrontImage.width}
+              />
+            </div>
           </div>
         </section>
       </div>

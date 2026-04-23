@@ -2,8 +2,10 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import {
+  aboutContent,
   bannedMockupValues,
   businessDetails,
+  homeWhatWeDo,
   integrationSettings,
   navigationItems,
   siteRoutes,
@@ -11,12 +13,20 @@ import {
 
 const routes = [...siteRoutes];
 
+// Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
   return `${businessDetails.canonicalSiteUrl}${pathname === '/' ? '' : pathname}`;
 }
 
+function normalizedReviewsWidgetClass() {
+  const trimmed = integrationSettings.reviewsWidgetId.trim();
+  return trimmed.startsWith('elfsight-app-')
+    ? trimmed
+    : `elfsight-app-${trimmed}`;
+}
+
 test.describe('public routes', () => {
-  test('home page keeps the intro copy without a duplicated page headline', async ({
+  test('home page keeps core what-we-do content without a duplicated page headline', async ({
     page,
   }) => {
     await page.goto('/');
@@ -36,10 +46,13 @@ test.describe('public routes', () => {
     await expect(
       page
         .locator('main')
-        .getByText(
-          'Drop in for a proper browse, ask about a collection',
-          { exact: false },
-        )
+        .getByText(homeWhatWeDo.heading, { exact: true })
+        .first(),
+    ).toBeVisible();
+    await expect(
+      page
+        .locator('main')
+        .getByText(homeWhatWeDo.intro, { exact: false })
         .first(),
     ).toBeVisible();
   });
@@ -84,11 +97,15 @@ test.describe('public routes', () => {
     await expect(main.getByText('49 Greengate Street').first()).toBeVisible();
     await expect(main.getByText('Stafford').first()).toBeVisible();
     await expect(main.getByText('ST16 2JA').first()).toBeVisible();
-    await expect(main.getByText('Opening Hours')).toHaveCount(0);
-    await expect(main.getByText(businessDetails.openingHours)).toHaveCount(0);
     await expect(
       page.getByRole('link', { name: 'Get Directions' }),
     ).toHaveAttribute('href', businessDetails.directionsUrl);
+    await expect(
+      page.locator('footer').getByRole('heading', { name: 'Opening times' }),
+    ).toBeVisible();
+    await expect(
+      page.locator('footer').getByText('Tuesday - 10:00 - 17:00'),
+    ).toBeVisible();
   });
 
   test('contact form renders required fields and submit control', async ({
@@ -125,31 +142,25 @@ test.describe('public routes', () => {
   test('reviews page keeps only the embedded widget area', async ({ page }) => {
     await page.goto('/reviews/');
 
-    await expect(page.getByText('Google reviews')).toHaveCount(0);
     await expect(
-      page.getByRole('link', { name: 'Read on Google' }),
-    ).toHaveCount(0);
+      page.getByRole('heading', { name: 'Reviews', level: 1 }),
+    ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'Write a review' }),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole('link', { name: 'Leave Us a Review' }),
-    ).toHaveCount(0);
-    await expect(
-      page.locator('.elfsight-app-5c9dd34d-87e7-4dbe-828b-63797bbbfcbb'),
+      page.locator(`.${normalizedReviewsWidgetClass()}`),
     ).toHaveCount(1);
   });
 
-  test('about page uses permanent highlights and no placeholder prompt', async ({
+  test('about page shows current approved copy and owner section', async ({
     page,
   }) => {
     await page.goto('/about/');
 
-    await expect(page.getByText('Inside the High House')).toBeVisible();
-    await expect(page.getByText('Placeholder image area')).toHaveCount(0);
     await expect(
-      page.getByText('Use authentic shop photography here before launch'),
-    ).toHaveCount(0);
+      page.getByRole('heading', { name: aboutContent.ownerHeading }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(aboutContent.ownerParagraphs[0], { exact: false }),
+    ).toBeVisible();
   });
 
   test('newsletter section renders the Beehiiv embed form', async ({

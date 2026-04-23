@@ -151,6 +151,36 @@ button:active,
     @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-stone-900/20 shadow-sm;
   }
 
+  .logo-fade-shell {
+    position: relative;
+  }
+
+  .logo-fade-shell::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    background: radial-gradient(
+      140% 120% at 50% 50%,
+      transparent 68%,
+      var(--background) 100%
+    );
+  }
+
+  .logo-soft-fade {
+    display: block;
+    -webkit-mask-image: radial-gradient(
+      140% 120% at 50% 50%,
+      #000 74%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      140% 120% at 50% 50%,
+      #000 74%,
+      transparent 100%
+    );
+  }
+
   .text-hover-accent {
     @apply transition-colors;
   }

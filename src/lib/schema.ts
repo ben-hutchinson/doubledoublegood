@@ -1,14 +1,28 @@
-import { businessDetails } from '@/lib/site-content';
+import { businessDetails, socialLinks } from '@/lib/site-content';
 
 export function getLocalBusinessSchema() {
+  const metadataBase = new URL(businessDetails.canonicalSiteUrl);
+  const image = new URL('/shopfront.jpg', metadataBase).toString();
+  const logo = new URL('/double-double-good-logo.jpg', metadataBase).toString();
+  const sameAs = Array.from(
+    new Set(
+      socialLinks
+        .map((link) => link.href.trim())
+        .filter((href) => /^https?:\/\//.test(href)),
+    ),
+  );
+
   return {
     '@context': 'https://schema.org',
     '@type': 'MusicStore',
     name: businessDetails.name,
     description: businessDetails.headline,
+    image,
+    logo,
     telephone: businessDetails.phone,
     email: businessDetails.email,
     url: businessDetails.canonicalSiteUrl,
+    hasMap: businessDetails.mapEmbedUrl,
     address: {
       '@type': 'PostalAddress',
       streetAddress: businessDetails.addressLine1,
@@ -16,6 +30,16 @@ export function getLocalBusinessSchema() {
       postalCode: businessDetails.postcode,
       addressCountry: 'GB',
     },
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer service',
+        telephone: businessDetails.phone,
+        email: businessDetails.email,
+        areaServed: 'GB',
+        availableLanguage: 'en-GB',
+      },
+    ],
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -48,6 +72,6 @@ export function getLocalBusinessSchema() {
         closes: '17:00',
       },
     ],
-    sameAs: [],
+    sameAs,
   };
 }

@@ -10,9 +10,19 @@ type CarouselItem = {
 
 type ImageCarouselProps = {
   items: CarouselItem[];
+  className?: string;
+  imageClassName?: string;
+  showCounter?: boolean;
+  showTopBorder?: boolean;
 };
 
-export function ImageCarousel({ items }: ImageCarouselProps) {
+export function ImageCarousel({
+  items,
+  className,
+  imageClassName,
+  showCounter = true,
+  showTopBorder = true,
+}: ImageCarouselProps) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -31,10 +41,25 @@ export function ImageCarousel({ items }: ImageCarouselProps) {
     return null;
   }
 
+  const sectionClassName = [
+    'section-card space-y-5',
+    showTopBorder ? 'border-t border-stone-900/12 pt-6' : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const imageShellClassName = [
+    'media-zoom relative overflow-hidden rounded-[1.2rem] border border-stone-900/12 bg-stone-100',
+    imageClassName ?? 'h-[30rem]',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <section className="section-card space-y-5 border-t border-stone-900/12 pt-6">
+    <section className={sectionClassName}>
       <div className="space-y-4">
-        <div className="media-zoom relative h-[30rem] overflow-hidden rounded-[1.2rem] border border-stone-900/12 bg-stone-100">
+        <div className={imageShellClassName}>
           {items.map((item, itemIndex) => (
             <Image
               fill
@@ -50,9 +75,11 @@ export function ImageCarousel({ items }: ImageCarouselProps) {
           ))}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
-        <p className="text-sm font-semibold text-stone-500">
-          {index + 1} / {items.length}
-        </p>
+        {showCounter ? (
+          <p className="text-sm font-semibold text-stone-500">
+            {index + 1} / {items.length}
+          </p>
+        ) : null}
       </div>
     </section>
   );

@@ -15,11 +15,6 @@ export type SocialLink = {
     | 'phone';
 };
 
-export type AboutHighlight = {
-  label: string;
-  value: string;
-};
-
 export type CarouselImage = {
   alt: string;
   src: string;
@@ -124,6 +119,8 @@ export const socialLinks: SocialLink[] = [
 ];
 
 export const integrationSettings = {
+  // Set to the real Formspree endpoint before go-live, e.g. https://formspree.io/f/abcdwxyz
+  contactFormEndpoint: '',
   beehiivEmbedScriptUrl: 'https://subscribe-forms.beehiiv.com/embed.js',
   beehiivFormUrl:
     process.env.NEXT_PUBLIC_BEEHIIV_FORM_URL ??
@@ -170,28 +167,51 @@ export const carouselItems: CarouselImage[] = [
 export const aboutContent = {
   title: 'About',
   shopHeading: 'The Shop',
-  shopSubheading: 'Inside the High House',
+  shopSubheading: '',
+  shopLead: 'Built on a love of music',
   shopParagraphs: [
-    'Our Record Shop is fortunate to be based in the Ancient High House Stafford, a Grade II listed building, which was built in around 1595. The timber framed building is reputed to be the largest surviving town house in England from the Tudor period.',
-    'We have over 20,000 second hand records for you to browse at your leisure.',
-    'We also stock new and sealed records plus second hand CDs. All genres catered for including Rock, Pop, Soul, Indie, Punk, Blues, Metal, Reggae, Folk & Jazz on all formats (7″, 12″, LPs & CDs). You’ll find an eclectic mix to browse and dig.',
-    'So come and find your next vinyl gem here at the Double Good.',
+    'Our story began in 2019, starting from the humble surroundings of a market stall. With nothing more than a carefully curated selection of records and a passion for vinyl, we set out to create something special for fellow music lovers.',
+    'What started small quickly grew. As more people discovered us and shared our enthusiasm, we took the next step—moving into our first retail shop on Mill Street. It gave us the space to expand our collection, connect with customers, and build a proper home for digging through records.',
+    'Today, our record shop is fortunate to be based in the Ancient High House in Stafford, a Grade II listed building built around 1595. The timber-framed building is reputed to be the largest surviving town house in England from the Tudor period, making it a truly unique setting to explore music across the decades.',
+    "From a market stall in 2019 to one of Stafford's most historic buildings, everything we do is rooted in a genuine love for records and the people who collect them.",
   ],
   ownerHeading: 'The Owner',
   ownerSubheading: 'The person behind the counter',
   ownerParagraphs: [
-    'Use this space to share the owner story in your own words, from early music influences through to opening the shop in Stafford.',
-    'A short first-person paragraph about what the shop means to the local community works well here.',
-    'You can also add details about favourite genres, buying philosophy, and what customers can expect when they visit.',
+    'Owner story placeholder copy goes here for now.',
+    'Use this section to share background, favourite genres, and what customers can expect in the shop.',
+    'When you are ready, this can be swapped for the final owner profile copy.',
   ],
+  ownerImage: {
+    alt: 'Lee in the Double Double Good shop',
+    height: 1600,
+    src: '/lee.jpg',
+    width: 1200,
+  },
 };
 
-export const aboutHighlights: AboutHighlight[] = [
-  { label: 'Home Since', value: 'Ancient High House, Stafford' },
-  { label: 'Building Era', value: 'Late 16th century' },
-  { label: 'Stock Focus', value: '20,000+ second-hand records' },
-  { label: 'Formats', value: 'LPs, 12", 7", and CDs' },
-];
+export const homeWhatWeDo = {
+  heading: 'What we do',
+  intro:
+    "We buy and sell vinyl records across a wide range of genres and formats. Whether you're searching for something specific or just browsing, there's always something new to discover.",
+  stockHeading: 'Our stock includes:',
+  stockItems: [
+    'New and second-hand vinyl',
+    'Albums, singles, and LPs',
+    'Genres spanning rock, indie, punk, jazz, soul, funk, reggae, folk and more',
+    'Rare, collectible, and everyday classics',
+  ],
+  buyParagraph:
+    "We're always looking to buy records too. Whether you've got a small selection or a full collection, we offer fair prices and a straightforward, honest approach.",
+  closing:
+    "From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.",
+  shopfrontImage: {
+    alt: 'The Double Double Good shopfront at the Ancient High House',
+    height: 1600,
+    src: '/shopfront.jpg',
+    width: 1200,
+  },
+};
 
 export const findUsContent = {
   title: 'Find Us',
@@ -213,9 +233,8 @@ export const findUsContent = {
 export const sellContent = {
   title: 'Sell',
   paragraphs: [
-    'Do you have records that you no longer listen to?',
-    'All records have different values. Generally, the more copies that the records has sold, the less value it has.',
-    'We buy all types of records and can offer you Cash or a transfer via PayPal for them. Just get in touch via the contact form, email or phone. Home collections can also be arranged!',
+    "If you're thinking about selling, we make it simple.",
+    "We're interested in all types of vinyl—from well-loved classics to more obscure finds. Values can vary, but we're always happy to take a look and give you a fair offer.",
   ],
   buyingList: [
     'LPs and 12-inch singles',
@@ -228,12 +247,18 @@ export const sellContent = {
 
 export const contactContent = {
   title: 'Contact',
-  cards: [
-    { label: 'Phone', value: businessDetails.phone },
-    { label: 'Email', value: businessDetails.email },
-    { label: 'Hours', value: businessDetails.weeklyOpeningHours.join('\n') },
-    { label: 'Address', value: businessDetails.addressLines.join('\n') },
+  getInTouchHeading: 'Get In Touch',
+  paragraphs: [
+    "We're always happy to talk music—whether you're buying, selling, or just curious.",
+    'You can reach us in a way that suits you:',
   ],
+  options: [
+    'Visit us in-store and browse in person',
+    'Give us a call for quick enquiries',
+    'Send us an email with details of your records',
+    'Use the contact form on our website anytime',
+  ],
+  outro: 'Or simply drop by and have a dig—you never know what you might find.',
 };
 
 export const reviewsContent = {
