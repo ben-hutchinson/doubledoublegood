@@ -26,6 +26,18 @@ function normalizedReviewsWidgetClass() {
 }
 
 test.describe('public routes', () => {
+  test('skip link is the first keyboard focus target and jumps to main content', async ({
+    page,
+  }) => {
+    await page.goto('/about/');
+
+    await page.keyboard.press('Tab');
+    const skipLink = page.getByRole('link', { name: 'Skip to main content' });
+    await expect(skipLink).toBeFocused();
+    await skipLink.press('Enter');
+    await expect(page).toHaveURL(/#main-content$/);
+  });
+
   test('home page keeps core what-we-do content without a duplicated page headline', async ({
     page,
   }) => {
@@ -87,6 +99,61 @@ test.describe('public routes', () => {
     await expect(nav.getByRole('link', { name: 'Reviews' })).toBeVisible();
   });
 
+  test('active primary navigation item exposes aria-current', async ({
+    page,
+  }) => {
+    await page.goto('/about/');
+
+    await expect(
+      page.getByRole('link', { name: 'About' }).first(),
+    ).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('about page carousel supports manual controls and pauses while focused', async ({
+    page,
+  }) => {
+    await page.goto('/about/');
+
+    const carousel = page.getByLabel('Shop image carousel');
+    const counter = carousel.locator('p', { hasText: '/' });
+    const pauseButton = carousel.getByRole('button', {
+      name: 'Pause autoplay',
+    });
+    const nextButton = carousel.getByRole('button', { name: 'Next' });
+    const previousButton = carousel.getByRole('button', { name: 'Previous' });
+
+    await expect(previousButton).toBeVisible();
+    await expect(nextButton).toBeVisible();
+    await expect(pauseButton).toBeVisible();
+
+    const initialCounter = (await counter.textContent())?.trim();
+    await nextButton.click();
+    await expect(counter).not.toHaveText(initialCounter ?? '');
+
+    const counterAfterManualNext = (await counter.textContent())?.trim();
+    await previousButton.focus();
+    await page.waitForTimeout(4200);
+    await expect(counter).toHaveText(counterAfterManualNext ?? '');
+  });
+
+  test('about page carousel disables autoplay for reduced motion users', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/about/');
+
+    const carousel = page.getByLabel('Shop image carousel');
+    const counter = carousel.locator('p', { hasText: '/' });
+    const reducedMotionPauseButton = carousel.getByRole('button', {
+      name: 'Resume autoplay',
+    });
+
+    await expect(reducedMotionPauseButton).toBeVisible();
+    const initialCounter = (await counter.textContent())?.trim();
+    await page.waitForTimeout(4200);
+    await expect(counter).toHaveText(initialCounter ?? '');
+  });
+
   test('find us page contains the correct facts and directions link', async ({
     page,
   }) => {
@@ -132,9 +199,31 @@ test.describe('public routes', () => {
     const contactForm = page.locator('main form').first();
 
     await contactForm.getByRole('button', { name: 'Send Message' }).click();
+    await expect(contactForm.getByLabel('Name')).toBeFocused();
+    await expect(contactForm.getByLabel('Name')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await expect(contactForm.getByLabel('Email')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await expect(contactForm.getByLabel('Message')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await expect(
+      contactForm.getByText('Please enter your name.'),
+    ).toBeVisible();
+    await expect(
+      contactForm.getByText('Please enter your email address.'),
+    ).toBeVisible();
+    await expect(
+      contactForm.getByText('Please enter your message.'),
+    ).toBeVisible();
     await expect(
       contactForm.getByText(
-        'Please complete your name, email address, and message.',
+        'Please fix the highlighted fields before sending.',
       ),
     ).toBeVisible();
   });

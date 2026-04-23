@@ -1,14 +1,19 @@
 import { businessDetails, socialLinks } from '@/lib/site-content';
+import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
 
 export function getLocalBusinessSchema() {
   const metadataBase = new URL(businessDetails.canonicalSiteUrl);
   const image = new URL('/shopfront.jpg', metadataBase).toString();
   const logo = new URL('/double-double-good-logo.jpg', metadataBase).toString();
+  const mapUrl = getTrustedExternalUrl(businessDetails.mapEmbedUrl, {
+    allowedHostnames: trustedHostnames.mapEmbed,
+  });
   const sameAs = Array.from(
     new Set(
       socialLinks
         .map((link) => link.href.trim())
-        .filter((href) => /^https?:\/\//.test(href)),
+        .map((href) => getTrustedExternalUrl(href))
+        .filter(Boolean),
     ),
   );
 
@@ -22,7 +27,7 @@ export function getLocalBusinessSchema() {
     telephone: businessDetails.phone,
     email: businessDetails.email,
     url: businessDetails.canonicalSiteUrl,
-    hasMap: businessDetails.mapEmbedUrl,
+    ...(mapUrl ? { hasMap: mapUrl } : {}),
     address: {
       '@type': 'PostalAddress',
       streetAddress: businessDetails.addressLine1,

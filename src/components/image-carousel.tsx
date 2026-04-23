@@ -24,9 +24,36 @@ export function ImageCarousel({
   showTopBorder = true,
 }: ImageCarouselProps) {
   const [index, setIndex] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isUserPaused, setIsUserPaused] = useState(false);
+  const [isHoverPaused, setIsHoverPaused] = useState(false);
+  const [isFocusPaused, setIsFocusPaused] = useState(false);
 
   useEffect(() => {
-    if (items.length <= 1) {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const updatePreference = () => {
+      setPrefersReducedMotion(mediaQuery.matches);
+    };
+
+    updatePreference();
+    mediaQuery.addEventListener('change', updatePreference);
+
+    return () => {
+      mediaQuery.removeEventListener('change', updatePreference);
+    };
+  }, []);
+
+  const hasMultipleItems = items.length > 1;
+  const shouldAutoRotate =
+    hasMultipleItems &&
+    !prefersReducedMotion &&
+    !isUserPaused &&
+    !isHoverPaused &&
+    !isFocusPaused;
+
+  useEffect(() => {
+    if (!shouldAutoRotate) {
       return;
     }
 
@@ -35,11 +62,13 @@ export function ImageCarousel({
     }, 3800);
 
     return () => window.clearInterval(interval);
-  }, [items.length]);
+  }, [items.length, shouldAutoRotate]);
 
   if (items.length === 0) {
     return null;
   }
+
+  const safeIndex = index % items.length;
 
   const sectionClassName = [
     'section-card space-y-5',
@@ -56,8 +85,28 @@ export function ImageCarousel({
     .filter(Boolean)
     .join(' ');
 
+  function goToPreviousSlide() {
+    setIndex((current) => (current - 1 + items.length) % items.length);
+  }
+
+  function goToNextSlide() {
+    setIndex((current) => (current + 1) % items.length);
+  }
+
   return (
-    <section className={sectionClassName}>
+    <section
+      aria-label="Shop image carousel"
+      aria-roledescription="carousel"
+      className={sectionClassName}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsFocusPaused(false);
+        }
+      }}
+      onFocusCapture={() => setIsFocusPaused(true)}
+      onMouseEnter={() => setIsHoverPaused(true)}
+      onMouseLeave={() => setIsHoverPaused(false)}
+    >
       <div className="space-y-4">
         <div className={imageShellClassName}>
           {items.map((item, itemIndex) => (
@@ -66,7 +115,7 @@ export function ImageCarousel({
               key={item.src}
               alt={item.alt}
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
-                itemIndex === index ? 'opacity-100' : 'opacity-0'
+                itemIndex === safeIndex ? 'opacity-100' : 'opacity-0'
               }`}
               loading={itemIndex === 0 ? 'eager' : undefined}
               sizes="(min-width: 1280px) 62vw, 100vw"
@@ -75,11 +124,45 @@ export function ImageCarousel({
           ))}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
-        {showCounter ? (
-          <p className="text-sm font-semibold text-stone-500">
-            {index + 1} / {items.length}
-          </p>
-        ) : null}
+
+        <div className="flex flex-wrap items-center gap-3">
+          {hasMultipleItems ? (
+            <>
+              <button
+                className="rounded-xl border border-stone-900/25 bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-stone-200"
+                onClick={goToPreviousSlide}
+                type="button"
+              >
+                Previous
+              </button>
+              <button
+                className="rounded-xl border border-stone-900/25 bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-stone-200"
+                onClick={goToNextSlide}
+                type="button"
+              >
+                Next
+              </button>
+              <button
+                aria-pressed={isUserPaused || prefersReducedMotion}
+                className="rounded-xl border border-stone-900/25 bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-stone-200"
+                onClick={() => setIsUserPaused((current) => !current)}
+                type="button"
+              >
+                {isUserPaused || prefersReducedMotion
+                  ? 'Resume autoplay'
+                  : 'Pause autoplay'}
+              </button>
+            </>
+          ) : null}
+          {showCounter ? (
+            <p
+              aria-live="polite"
+              className="text-sm font-semibold text-stone-500"
+            >
+              {safeIndex + 1} / {items.length}
+            </p>
+          ) : null}
+        </div>
       </div>
     </section>
   );

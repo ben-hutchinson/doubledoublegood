@@ -148,7 +148,7 @@ function getButtonClass(icon: SocialLink['icon']) {
     return 'header-social-button bg-[#ea4335] text-white hover:bg-[#cf392c]';
   }
 
-  return 'header-social-button bg-[#34c759] text-white hover:bg-[#2aa64a]';
+  return 'header-social-button bg-[#1f8f3a] text-white hover:bg-[#166b2a]';
 }
 
 function isExternalLink(href: string) {

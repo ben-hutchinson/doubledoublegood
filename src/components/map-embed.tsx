@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
+
 type MapEmbedProps = {
   embedUrl?: string;
   title: string;
@@ -9,8 +11,11 @@ type MapEmbedProps = {
 
 export function MapEmbed({ embedUrl, title }: MapEmbedProps) {
   const [loaded, setLoaded] = useState(false);
+  const trustedEmbedUrl = getTrustedExternalUrl(embedUrl ?? '', {
+    allowedHostnames: trustedHostnames.mapEmbed,
+  });
 
-  if (!embedUrl) {
+  if (!trustedEmbedUrl) {
     return (
       <div className="flex h-full min-h-[24rem] items-center justify-center rounded-[1rem] border border-dashed border-stone-900/35">
         <p className="max-w-md text-center text-base leading-7 text-stone-700">
@@ -29,8 +34,9 @@ export function MapEmbed({ embedUrl, title }: MapEmbedProps) {
         }`}
         loading="lazy"
         onLoad={() => setLoaded(true)}
-        referrerPolicy="no-referrer-when-downgrade"
-        src={embedUrl}
+        referrerPolicy="strict-origin-when-cross-origin"
+        sandbox="allow-popups allow-same-origin allow-scripts"
+        src={trustedEmbedUrl}
         title={title}
       />
     </div>

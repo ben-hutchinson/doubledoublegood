@@ -23,6 +23,7 @@ export function PrimaryNav({ items }: PrimaryNavProps) {
           return (
             <li key={item.href} className="sm:flex">
               <Link
+                aria-current={isActive ? 'page' : undefined}
                 className={`heading-section nav-link link-sweep text-hover-accent inline-flex w-full items-center justify-center px-3 py-2 text-sm font-semibold text-stone-50 uppercase sm:min-h-12 ${
                   isActive ? 'is-active' : ''
                 }`}

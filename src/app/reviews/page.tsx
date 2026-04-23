@@ -16,7 +16,6 @@ export default function ReviewsPage() {
     <PageShell title={reviewsContent.title}>
       <ReviewsEmbed
         iframeUrl={integrationSettings.reviewsEmbedUrl}
-        scriptUrl={integrationSettings.reviewsScriptUrl}
         widgetId={integrationSettings.reviewsWidgetId}
       />
     </PageShell>

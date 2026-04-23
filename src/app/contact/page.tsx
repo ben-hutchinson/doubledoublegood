@@ -28,9 +28,9 @@ export default function ContactPage() {
           <p>{contactContent.outro}</p>
         </ContentCard>
         <div>
-          <p className="heading-section mb-4 text-lg font-black text-stone-950 uppercase">
+          <h2 className="heading-section mb-4 text-lg font-black text-stone-950 uppercase">
             Send Us a Message
-          </p>
+          </h2>
           <ContactForm />
         </div>
       </div>

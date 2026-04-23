@@ -22,6 +22,7 @@ export function createPageMetadata(
     title: pageTitle,
     description,
     metadataBase,
+    referrer: 'strict-origin-when-cross-origin',
     icons: {
       icon: '/icon.png',
       shortcut: '/icon.png',

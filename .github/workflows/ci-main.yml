@@ -31,6 +31,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run production dependency audit
+        id: npm_audit
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high --json > npm-audit-report.json
+
+      - name: Upload npm audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+
+      - name: Fail on high or critical production vulnerabilities
+        if: steps.npm_audit.outcome == 'failure'
+        run: exit 1
+
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 

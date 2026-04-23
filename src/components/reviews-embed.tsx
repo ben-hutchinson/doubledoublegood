@@ -2,27 +2,30 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
+
 type ReviewsEmbedProps = {
   iframeUrl?: string;
-  scriptUrl?: string;
   widgetId?: string;
 };
 
-const DEFAULT_ELFSIGHT_SCRIPT_URL =
-  'https://elfsightcdn.com/platform.js';
+const DEFAULT_ELFSIGHT_SCRIPT_URL = 'https://elfsightcdn.com/platform.js';
 
-export function ReviewsEmbed({
-  iframeUrl,
-  scriptUrl,
-  widgetId,
-}: ReviewsEmbedProps) {
+export function ReviewsEmbed({ iframeUrl, widgetId }: ReviewsEmbedProps) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [widgetLoaded, setWidgetLoaded] = useState(false);
   const normalizedWidgetId = widgetId?.trim() ?? '';
   const normalizedIframeUrl = iframeUrl?.trim() ?? '';
-  const normalizedScriptUrl =
-    scriptUrl?.trim() ||
-    (normalizedWidgetId ? DEFAULT_ELFSIGHT_SCRIPT_URL : '');
+  const trustedIframeUrl = useMemo(
+    () =>
+      getTrustedExternalUrl(normalizedIframeUrl, {
+        allowedHostnames: trustedHostnames.reviewsEmbed,
+      }),
+    [normalizedIframeUrl],
+  );
+  const trustedScriptUrl = getTrustedExternalUrl(DEFAULT_ELFSIGHT_SCRIPT_URL, {
+    allowedHostnames: trustedHostnames.reviewsScript,
+  });
 
   const widgetClassName = useMemo(() => {
     if (!normalizedWidgetId) {
@@ -35,7 +38,7 @@ export function ReviewsEmbed({
   }, [normalizedWidgetId]);
 
   useEffect(() => {
-    if (!widgetClassName || !normalizedScriptUrl) {
+    if (!widgetClassName || !trustedScriptUrl) {
       return;
     }
 
@@ -47,10 +50,10 @@ export function ReviewsEmbed({
 
     const script = document.createElement('script');
     script.id = 'reviews-widget-script';
-    script.src = normalizedScriptUrl;
+    script.src = trustedScriptUrl;
     script.async = true;
     document.body.appendChild(script);
-  }, [normalizedScriptUrl, widgetClassName]);
+  }, [trustedScriptUrl, widgetClassName]);
 
   useEffect(() => {
     if (!widgetClassName) {
@@ -79,7 +82,7 @@ export function ReviewsEmbed({
     };
   }, [widgetClassName]);
 
-  if (normalizedIframeUrl) {
+  if (trustedIframeUrl) {
     return (
       <section className="border-t border-stone-900/12 pt-6">
         <div className="embed-shell min-h-[32rem] w-full rounded-[1rem] border border-stone-900/12 bg-white">
@@ -90,7 +93,9 @@ export function ReviewsEmbed({
             }`}
             loading="lazy"
             onLoad={() => setIframeLoaded(true)}
-            src={normalizedIframeUrl}
+            referrerPolicy="strict-origin-when-cross-origin"
+            sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+            src={trustedIframeUrl}
             title="Double Double Good Music Emporium Google reviews"
           />
         </div>
@@ -112,8 +117,9 @@ export function ReviewsEmbed({
   return (
     <section className="space-y-5 border-t border-stone-900/12 pt-6">
       <p className="max-w-2xl text-base leading-7 text-stone-700">
-        The widget area is ready. Once a provider widget ID is configured, live
-        Google reviews will render here without changing the page layout.
+        The widget area is ready. Once a trusted provider widget ID or embed URL
+        is configured, live Google reviews will render here without changing the
+        page layout.
       </p>
     </section>
   );

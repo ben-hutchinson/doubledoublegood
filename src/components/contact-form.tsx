@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
+import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
 import { integrationSettings } from '@/lib/site-content';
 
 type FormState = 'idle' | 'success' | 'error';
@@ -13,6 +14,8 @@ type FormValues = {
   message: string;
 };
 
+type FieldErrors = Partial<Record<keyof FormValues, string>>;
+
 const initialValues: FormValues = {
   name: '',
   email: '',
@@ -20,30 +23,97 @@ const initialValues: FormValues = {
   message: '',
 };
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validationOrder: Array<keyof FormValues> = ['name', 'email', 'message'];
+
+function validateFields(values: FormValues): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (!values.name.trim()) {
+    errors.name = 'Please enter your name.';
+  }
+
+  const normalizedEmail = values.email.trim();
+
+  if (!normalizedEmail) {
+    errors.email = 'Please enter your email address.';
+  } else if (!emailRegex.test(normalizedEmail)) {
+    errors.email = 'Please enter a valid email address.';
+  }
+
+  if (!values.message.trim()) {
+    errors.message = 'Please enter your message.';
+  }
+
+  return errors;
+}
+
 export function ContactForm() {
   const [values, setValues] = useState<FormValues>(initialValues);
   const [state, setState] = useState<FormState>('idle');
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  const nameFieldRef = useRef<HTMLInputElement>(null);
+  const emailFieldRef = useRef<HTMLInputElement>(null);
+  const messageFieldRef = useRef<HTMLTextAreaElement>(null);
+
+  function focusField(field: keyof FormValues) {
+    if (field === 'name') {
+      nameFieldRef.current?.focus();
+      return;
+    }
+
+    if (field === 'email') {
+      emailFieldRef.current?.focus();
+      return;
+    }
+
+    if (field === 'message') {
+      messageFieldRef.current?.focus();
+    }
+  }
 
   function updateField<Key extends keyof FormValues>(
     key: Key,
     value: FormValues[Key],
   ) {
     setValues((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => {
+      if (!current[key]) {
+        return current;
+      }
+
+      return { ...current, [key]: undefined };
+    });
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
+    const validationErrors = validateFields(values);
 
-    if (!values.name.trim() || !values.email.trim() || !values.message.trim()) {
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
       setState('error');
-      setFeedback('Please complete your name, email address, and message.');
+      setFeedback('Please fix the highlighted fields before sending.');
+
+      const firstInvalidField = validationOrder.find((field) =>
+        Boolean(validationErrors[field]),
+      );
+
+      if (firstInvalidField) {
+        focusField(firstInvalidField);
+      }
+
       return;
     }
 
     const endpoint = integrationSettings.contactFormEndpoint.trim();
+    const trustedEndpoint = getTrustedExternalUrl(endpoint, {
+      allowedHostnames: trustedHostnames.contactFormEndpoint,
+    });
     const formData = new FormData(formElement);
     const honeypot = String(formData.get('company') ?? '').trim();
 
@@ -51,10 +121,11 @@ export function ContactForm() {
       setState('success');
       setFeedback("Thanks, we'll get back to you soon.");
       setValues(initialValues);
+      setFieldErrors({});
       return;
     }
 
-    if (!endpoint) {
+    if (!trustedEndpoint) {
       setState('error');
       setFeedback(
         'Contact form is temporarily unavailable right now. Please call or email the shop directly.',
@@ -65,6 +136,7 @@ export function ContactForm() {
     setIsSubmitting(true);
     setState('idle');
     setFeedback('');
+    setFieldErrors({});
 
     try {
       const payload = {
@@ -77,7 +149,7 @@ export function ContactForm() {
         source: 'website-contact-form',
       };
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(trustedEndpoint, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -114,7 +186,12 @@ export function ContactForm() {
   }
 
   return (
-    <form className="section-card space-y-5" noValidate onSubmit={handleSubmit}>
+    <form
+      aria-describedby={feedback ? 'contact-form-feedback' : undefined}
+      className="section-card space-y-5"
+      noValidate
+      onSubmit={handleSubmit}
+    >
       <div className="grid gap-4">
         <div className="space-y-2">
           <label
@@ -124,15 +201,25 @@ export function ContactForm() {
             Name
           </label>
           <input
+            aria-describedby={
+              fieldErrors.name ? 'contact-name-error' : undefined
+            }
+            aria-invalid={Boolean(fieldErrors.name)}
             autoComplete="name"
             className="min-h-12 w-full rounded-2xl border border-stone-900/70 bg-stone-50 px-4 text-base text-stone-900"
             id="contact-name"
             name="name"
             onChange={(event) => updateField('name', event.target.value)}
+            ref={nameFieldRef}
             required
             type="text"
             value={values.name}
           />
+          {fieldErrors.name ? (
+            <p className="text-sm text-red-700" id="contact-name-error">
+              {fieldErrors.name}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <label
@@ -142,15 +229,25 @@ export function ContactForm() {
             Email
           </label>
           <input
+            aria-describedby={
+              fieldErrors.email ? 'contact-email-error' : undefined
+            }
+            aria-invalid={Boolean(fieldErrors.email)}
             autoComplete="email"
             className="min-h-12 w-full rounded-2xl border border-stone-900/70 bg-stone-50 px-4 text-base text-stone-900"
             id="contact-email"
             name="email"
             onChange={(event) => updateField('email', event.target.value)}
+            ref={emailFieldRef}
             required
             type="email"
             value={values.email}
           />
+          {fieldErrors.email ? (
+            <p className="text-sm text-red-700" id="contact-email-error">
+              {fieldErrors.email}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <label
@@ -177,13 +274,23 @@ export function ContactForm() {
             Message
           </label>
           <textarea
+            aria-describedby={
+              fieldErrors.message ? 'contact-message-error' : undefined
+            }
+            aria-invalid={Boolean(fieldErrors.message)}
             className="min-h-40 w-full rounded-2xl border border-stone-900/70 bg-stone-50 px-4 py-3 text-base text-stone-900"
             id="contact-message"
             name="message"
             onChange={(event) => updateField('message', event.target.value)}
+            ref={messageFieldRef}
             required
             value={values.message}
           />
+          {fieldErrors.message ? (
+            <p className="text-sm text-red-700" id="contact-message-error">
+              {fieldErrors.message}
+            </p>
+          ) : null}
         </div>
       </div>
       <input
@@ -203,10 +310,13 @@ export function ContactForm() {
         </button>
         {feedback ? (
           <p
+            aria-atomic="true"
             aria-live="polite"
             className={`max-w-md text-sm leading-6 ${
               state === 'success' ? 'text-green-700' : 'text-red-700'
             }`}
+            id="contact-form-feedback"
+            role={state === 'error' ? 'alert' : undefined}
           >
             {feedback}
           </p>

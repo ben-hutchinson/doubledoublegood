@@ -1,3 +1,9 @@
+import {
+  getTrustedExternalUrl,
+  getTrustedSiteUrl,
+  trustedHostnames,
+} from '@/lib/security';
+
 export type NavigationItem = {
   href: string;
   label: string;
@@ -6,13 +12,7 @@ export type NavigationItem = {
 export type SocialLink = {
   href: string;
   label: string;
-  icon:
-    | 'facebook'
-    | 'instagram'
-    | 'x'
-    | 'discogs'
-    | 'email'
-    | 'phone';
+  icon: 'facebook' | 'instagram' | 'x' | 'discogs' | 'email' | 'phone';
 };
 
 export type CarouselImage = {
@@ -68,8 +68,10 @@ export const businessDetails = {
     'https://www.google.com/maps/dir/?api=1&destination=49%20Greengate%20Street%2C%20Stafford%2C%20ST16%202JA',
   mapEmbedUrl:
     'https://www.google.com/maps?q=49%20Greengate%20Street%2C%20Stafford%2C%20ST16%202JA&z=16&output=embed',
-  canonicalSiteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://doubledoublegood.co.uk',
+  canonicalSiteUrl: getTrustedSiteUrl(
+    process.env.NEXT_PUBLIC_SITE_URL ?? '',
+    'https://doubledoublegood.co.uk',
+  ),
 };
 
 export const headerContent = {
@@ -120,21 +122,43 @@ export const socialLinks: SocialLink[] = [
 
 export const integrationSettings = {
   // Set to the real Formspree endpoint before go-live, e.g. https://formspree.io/f/abcdwxyz
-  contactFormEndpoint: '',
-  beehiivEmbedScriptUrl: 'https://subscribe-forms.beehiiv.com/embed.js',
-  beehiivFormUrl:
+  contactFormEndpoint: getTrustedExternalUrl(
+    process.env.NEXT_PUBLIC_CONTACT_FORM_ENDPOINT ?? '',
+    {
+      allowedHostnames: trustedHostnames.contactFormEndpoint,
+    },
+  ),
+  beehiivEmbedScriptUrl: getTrustedExternalUrl(
+    'https://subscribe-forms.beehiiv.com/embed.js',
+    {
+      allowedHostnames: trustedHostnames.beehiivEmbedScript,
+    },
+  ),
+  beehiivFormUrl: getTrustedExternalUrl(
     process.env.NEXT_PUBLIC_BEEHIIV_FORM_URL ??
-    'https://subscribe-forms.beehiiv.com/76ad9125-803e-4eae-98f9-d77178150405',
-  mapEmbedUrl: businessDetails.mapEmbedUrl,
-  reviewsEmbedUrl: process.env.NEXT_PUBLIC_REVIEWS_EMBED_URL ?? '',
+      'https://subscribe-forms.beehiiv.com/76ad9125-803e-4eae-98f9-d77178150405',
+    {
+      allowedHostnames: trustedHostnames.beehiivForm,
+    },
+  ),
+  mapEmbedUrl: getTrustedExternalUrl(businessDetails.mapEmbedUrl, {
+    allowedHostnames: trustedHostnames.mapEmbed,
+  }),
+  reviewsEmbedUrl: getTrustedExternalUrl(
+    process.env.NEXT_PUBLIC_REVIEWS_EMBED_URL ?? '',
+    {
+      allowedHostnames: trustedHostnames.reviewsEmbed,
+    },
+  ),
   reviewsWidgetId:
     process.env.NEXT_PUBLIC_REVIEWS_WIDGET_ID ??
     '5c9dd34d-87e7-4dbe-828b-63797bbbfcbb',
-  reviewsScriptUrl:
-    process.env.NEXT_PUBLIC_REVIEWS_SCRIPT_URL ??
-    'https://elfsightcdn.com/platform.js',
-  instagramReelEmbedUrl:
+  instagramReelEmbedUrl: getTrustedExternalUrl(
     'https://www.instagram.com/reel/DW-7Ec3DP10/embed/captioned/',
+    {
+      allowedHostnames: trustedHostnames.instagramEmbed,
+    },
+  ),
 };
 
 export const homeIntro = {
@@ -324,8 +348,8 @@ export const privacySections: PolicySection[] = [
   {
     heading: 'Third-party services',
     paragraphs: [
-      'The site can send form submissions through a configured third-party form provider and can load third-party content on the Find Us and Reviews pages.',
-      'Those services may process technical information such as your IP address, browser details, and the page you visited in order to display their content.',
+      'Contact-form submissions are sent to Formspree (form provider) and include your name, email, optional phone number, and message.',
+      'The site also loads third-party content from Beehiiv, Google Maps, Instagram, and review widgets. Those services may process technical information such as your IP address, browser details, and the page you visited in order to display their content.',
     ],
   },
   {

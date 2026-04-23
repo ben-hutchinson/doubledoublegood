@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
+
 type InstagramReelPanelProps = {
   embedUrl: string;
   className?: string;
@@ -20,6 +22,9 @@ export function InstagramReelPanel({
   fillAvailableHeight = false,
 }: InstagramReelPanelProps) {
   const [loaded, setLoaded] = useState(false);
+  const trustedEmbedUrl = getTrustedExternalUrl(embedUrl, {
+    allowedHostnames: trustedHostnames.instagramEmbed,
+  });
 
   const sectionClassName = [
     'section-card space-y-5',
@@ -45,20 +50,19 @@ export function InstagramReelPanel({
         </h2>
       </div>
       <div className={embedShellClassName}>
-        {embedUrl ? (
+        {trustedEmbedUrl ? (
           <>
             {!loaded ? <div className="embed-skeleton" /> : null}
             <iframe
               allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               className={`${embedMinHeightClass} w-full transition-opacity duration-300 ${
                 fillAvailableHeight ? 'h-full' : ''
-              } ${
-                loaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              } ${loaded ? 'opacity-100' : 'opacity-0'}`}
               loading="lazy"
               onLoad={() => setLoaded(true)}
               referrerPolicy="strict-origin-when-cross-origin"
-              src={embedUrl}
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+              src={trustedEmbedUrl}
               title="Latest Instagram reel from Double Double Good Music Emporium"
             />
           </>
