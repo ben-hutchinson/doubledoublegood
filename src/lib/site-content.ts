@@ -204,20 +204,44 @@ export const homeIntro = {
 
 export const carouselItems: CarouselImage[] = [
   {
-    alt: 'Rows of vinyl records in wooden crates',
-    src: 'https://picsum.photos/seed/vinyl-shop-1/1800/1200',
+    alt: 'Inside Double Double Good with vinyl racks and wall displays',
+    src: '/assets/shop-carousel/shop-interior-01.webp',
   },
   {
-    alt: 'Close-up of records and turntable details',
-    src: 'https://picsum.photos/seed/vinyl-shop-2/1800/1200',
+    alt: 'Wooden record bins arranged through the upper shop floor',
+    src: '/assets/shop-carousel/shop-interior-03.webp',
   },
   {
-    alt: 'Record sleeves lined up on a display wall',
-    src: 'https://picsum.photos/seed/vinyl-shop-3/1800/1200',
+    alt: 'Record crates and display sleeves beside the upper shop doorway',
+    src: '/assets/shop-carousel/shop-interior-04.webp',
   },
   {
-    alt: 'Music browsing atmosphere with stacked LPs',
-    src: 'https://picsum.photos/seed/vinyl-shop-4/1800/1200',
+    alt: 'Rows of vinyl records beneath framed album displays',
+    src: '/assets/shop-carousel/shop-interior-05.webp',
+  },
+  {
+    alt: 'Long wall of records and framed sleeves in the shop',
+    src: '/assets/shop-carousel/shop-interior-02.webp',
+  },
+  {
+    alt: 'Vinyl crates lining the stairway into the shop',
+    src: '/assets/shop-carousel/shop-interior-06.webp',
+  },
+  {
+    alt: 'Shop counter and front window inside the timber-framed building',
+    src: '/assets/shop-carousel/shop-interior-09.webp',
+  },
+  {
+    alt: 'Feature display wall with framed posters and new arrivals',
+    src: '/assets/shop-carousel/shop-interior-08.webp',
+  },
+  {
+    alt: 'Music press collage wall inside Double Double Good',
+    src: '/assets/shop-carousel/shop-interior-07.webp',
+  },
+  {
+    alt: 'Close-up of the music press collage wall',
+    src: '/assets/shop-carousel/shop-interior-10.webp',
   },
 ];
 

@@ -57,7 +57,7 @@ export function ImageCarousel({
 
     const interval = window.setInterval(() => {
       setIndex((current) => (current + 1) % items.length);
-    }, 3800);
+    }, 2600);
 
     return () => window.clearInterval(interval);
   }, [items.length, shouldAutoRotate]);

@@ -5,6 +5,7 @@ import {
   aboutContent,
   bannedMockupValues,
   businessDetails,
+  carouselItems,
   communityContent,
   homeWhatWeDo,
   integrationSettings,
@@ -203,9 +204,14 @@ test.describe('public routes', () => {
 
     await expect(carousel.getByRole('button')).toHaveCount(0);
     await expect(carousel.getByText(/^\d+\s*\/\s*\d+$/)).toHaveCount(0);
+    await expect(carousel.locator('img')).toHaveCount(10);
     await expect(carousel.locator('.media-zoom').first()).toHaveCSS(
       'border-radius',
       '19.2px',
+    );
+    expect(carouselItems).toHaveLength(10);
+    expect(carouselItems.every((item) => item.src.startsWith('/assets/shop-carousel/'))).toBe(
+      true,
     );
   });
 
@@ -248,6 +254,24 @@ test.describe('public routes', () => {
 
     await expect(carousel.getByRole('button')).toHaveCount(0);
     await expect(carousel.getByText(/^\d+\s*\/\s*\d+$/)).toHaveCount(0);
+  });
+
+  test('about page carousel rotates through shop images every few seconds', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/about/');
+    await page.mouse.move(1, 1);
+
+    const carousel = page.getByLabel('Shop image carousel');
+    const firstImage = carousel.locator(`img[alt="${carouselItems[0].alt}"]`);
+    const secondImage = carousel.locator(`img[alt="${carouselItems[1].alt}"]`);
+
+    await expect(firstImage).toHaveCSS('opacity', '1');
+    await expect(secondImage).toHaveCSS('opacity', '0');
+    await page.waitForTimeout(3300);
+    await expect(firstImage).toHaveCSS('opacity', '0');
+    await expect(secondImage).toHaveCSS('opacity', '1');
   });
 
   test('site photos use consistent rounded corners', async ({ page }) => {
