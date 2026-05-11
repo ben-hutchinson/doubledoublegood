@@ -19,12 +19,12 @@ test.describe('security URL allowlist helpers', () => {
   });
 
   test('accepts trusted hostnames for contact endpoint', () => {
-    const trustedContactUrl = 'https://formspree.io/f/abcdwxyz';
+    const trustedContactUrl = 'https://formspree.io/f/xqenwbzd';
 
     expect(
       getTrustedExternalUrl(trustedContactUrl, {
         allowedHostnames: trustedHostnames.contactFormEndpoint,
       }),
-    ).toBe('https://formspree.io/f/abcdwxyz');
+    ).toBe('https://formspree.io/f/xqenwbzd');
   });
 });

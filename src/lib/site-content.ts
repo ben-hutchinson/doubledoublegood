@@ -158,26 +158,22 @@ export const socialLinks: SocialLink[] = [
 ];
 
 export const integrationSettings = {
-  // Set to the real Formspree endpoint before go-live, e.g. https://formspree.io/f/abcdwxyz
   contactFormEndpoint: getTrustedExternalUrl(
-    process.env.NEXT_PUBLIC_CONTACT_FORM_ENDPOINT ?? '',
+    process.env.NEXT_PUBLIC_CONTACT_FORM_ENDPOINT ??
+      'https://formspree.io/f/xqenwbzd',
     {
       allowedHostnames: trustedHostnames.contactFormEndpoint,
     },
   ),
   beehiivEmbedScriptUrl: getTrustedExternalUrl(
-    'https://subscribe-forms.beehiiv.com/embed.js',
+    'https://subscribe-forms.beehiiv.com/v3/loader.js',
     {
       allowedHostnames: trustedHostnames.beehiivEmbedScript,
     },
   ),
-  beehiivFormUrl: getTrustedExternalUrl(
-    process.env.NEXT_PUBLIC_BEEHIIV_FORM_URL ??
-      'https://subscribe-forms.beehiiv.com/76ad9125-803e-4eae-98f9-d77178150405',
-    {
-      allowedHostnames: trustedHostnames.beehiivForm,
-    },
-  ),
+  beehiivFormId:
+    process.env.NEXT_PUBLIC_BEEHIIV_FORM_ID ??
+    '2c951e96-3dbb-4a70-adfb-bae21efd6b7b',
   mapEmbedUrl: getTrustedExternalUrl(businessDetails.mapEmbedUrl, {
     allowedHostnames: trustedHostnames.mapEmbed,
   }),

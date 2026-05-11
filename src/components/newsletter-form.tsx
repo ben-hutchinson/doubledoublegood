@@ -1,27 +1,57 @@
 'use client';
 
-import Script from 'next/script';
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
 import { integrationSettings } from '@/lib/site-content';
 
 export function NewsletterForm() {
-  const [loaded, setLoaded] = useState(false);
+  const embedShellRef = useRef<HTMLDivElement>(null);
   const trustedScriptUrl = getTrustedExternalUrl(
     integrationSettings.beehiivEmbedScriptUrl,
     {
       allowedHostnames: trustedHostnames.beehiivEmbedScript,
     },
   );
-  const trustedFormUrl = getTrustedExternalUrl(
-    integrationSettings.beehiivFormUrl,
-    {
-      allowedHostnames: trustedHostnames.beehiivForm,
-    },
-  );
 
-  if (!trustedFormUrl) {
+  useEffect(() => {
+    const embedShell = embedShellRef.current;
+
+    if (!embedShell || !trustedScriptUrl || !integrationSettings.beehiivFormId) {
+      return;
+    }
+
+    if (!embedShell.querySelector('script[data-beehiiv-form]')) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = trustedScriptUrl;
+      script.dataset.beehiivForm = integrationSettings.beehiivFormId;
+      embedShell.prepend(script);
+    }
+
+    if (!document.body) {
+      return;
+    }
+
+    const labelBeehiivFrames = () => {
+      document
+        .querySelectorAll<HTMLIFrameElement>(
+          'iframe[src^="https://subscribe-forms.beehiiv.com"]',
+        )
+        .forEach((iframe) => {
+          iframe.title = 'Join the Double Double Good mailing list';
+        });
+    };
+
+    labelBeehiivFrames();
+
+    const observer = new MutationObserver(labelBeehiivFrames);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, [trustedScriptUrl]);
+
+  if (!trustedScriptUrl || !integrationSettings.beehiivFormId) {
     return (
       <div className="rounded-[0.7rem] border border-dashed border-stone-900/35 p-5">
         <p className="text-sm leading-6 text-stone-700">
@@ -33,33 +63,11 @@ export function NewsletterForm() {
   }
 
   return (
-    <div className="embed-shell h-[47px] max-h-[47px] w-full max-w-[25rem] overflow-hidden">
-      {trustedScriptUrl ? (
-        <Script async src={trustedScriptUrl} strategy="afterInteractive" />
-      ) : null}
-      {!loaded ? <div className="embed-skeleton" /> : null}
-      <iframe
-        allow="fullscreen"
-        className={`beehiiv-embed block h-[47px] max-h-[47px] w-full max-w-full border-0 transition-opacity duration-300 ${
-          loaded ? 'opacity-100' : 'opacity-0'
-        }`}
-        data-test-id="beehiiv-embed"
-        frameBorder="0"
-        onLoad={() => setLoaded(true)}
-        referrerPolicy="strict-origin-when-cross-origin"
-        sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-        scrolling="no"
-        src={trustedFormUrl}
-        style={{
-          width: '400px',
-          height: '47px',
-          margin: '0',
-          borderRadius: '0',
-          backgroundColor: 'transparent',
-          boxShadow: '0 0 #0000',
-        }}
-        title="Join the Double Double Good mailing list"
-      />
+    <div
+      className="embed-shell min-h-[47px] w-full max-w-[25rem] overflow-hidden"
+      ref={embedShellRef}
+    >
+      <div className="embed-skeleton" />
     </div>
   );
 }

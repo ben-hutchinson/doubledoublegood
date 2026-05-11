@@ -321,10 +321,31 @@ test.describe('public routes', () => {
     const contactForm = page.locator('main form').first();
 
     await expect(contactForm).toHaveAttribute('data-hydrated', 'true');
+    await expect(contactForm).toHaveAttribute(
+      'action',
+      integrationSettings.contactFormEndpoint,
+    );
+    await expect(contactForm).toHaveAttribute('method', 'post');
     await expect(contactForm.getByLabel('Name')).toBeVisible();
+    await expect(contactForm.getByLabel('Name')).toHaveAttribute(
+      'name',
+      'name',
+    );
     await expect(contactForm.getByLabel('Email')).toBeVisible();
+    await expect(contactForm.getByLabel('Email')).toHaveAttribute(
+      'name',
+      'email',
+    );
     await expect(contactForm.getByLabel('Phone (optional)')).toBeVisible();
+    await expect(contactForm.getByLabel('Phone (optional)')).toHaveAttribute(
+      'name',
+      'phone',
+    );
     await expect(contactForm.getByLabel('Message')).toBeVisible();
+    await expect(contactForm.getByLabel('Message')).toHaveAttribute(
+      'name',
+      'message',
+    );
     await expect(
       contactForm.getByRole('button', { name: 'Send Message' }),
     ).toBeVisible();
@@ -401,20 +422,26 @@ test.describe('public routes', () => {
   }) => {
     await page.goto('/');
 
+    const beehiivLoader = page.locator('script[data-beehiiv-form]');
     const newsletterSection = page.locator('#newsletter');
-    const beehiivEmbed = newsletterSection.locator('iframe.beehiiv-embed');
-
-    await expect(beehiivEmbed).toHaveCount(1);
-    await expect(beehiivEmbed).toHaveAttribute(
-      'src',
-      integrationSettings.beehiivFormUrl,
+    const beehiivEmbed = newsletterSection.locator(
+      'iframe[src^="https://subscribe-forms.beehiiv.com"]',
     );
+
+    await expect(beehiivLoader).toHaveCount(1);
+    await expect(beehiivLoader).toHaveAttribute(
+      'src',
+      integrationSettings.beehiivEmbedScriptUrl,
+    );
+    await expect(beehiivLoader).toHaveAttribute(
+      'data-beehiiv-form',
+      integrationSettings.beehiivFormId,
+    );
+    await expect(beehiivEmbed).toHaveCount(1);
     await expect(beehiivEmbed).toHaveAttribute(
       'title',
       'Join the Double Double Good mailing list',
     );
-    await expect(beehiivEmbed).toHaveCSS('height', '47px');
-    await expect(beehiivEmbed).toHaveCSS('max-width', '100%');
   });
 
   test('no mockup placeholders leak into public routes', async ({ page }) => {

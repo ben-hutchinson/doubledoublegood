@@ -75,6 +75,10 @@ export function ContactForm() {
   const nameFieldRef = useRef<HTMLInputElement>(null);
   const emailFieldRef = useRef<HTMLInputElement>(null);
   const messageFieldRef = useRef<HTMLTextAreaElement>(null);
+  const endpoint = integrationSettings.contactFormEndpoint.trim();
+  const trustedEndpoint = getTrustedExternalUrl(endpoint, {
+    allowedHostnames: trustedHostnames.contactFormEndpoint,
+  });
 
   function focusField(field: keyof FormValues) {
     if (field === 'name') {
@@ -127,10 +131,6 @@ export function ContactForm() {
       return;
     }
 
-    const endpoint = integrationSettings.contactFormEndpoint.trim();
-    const trustedEndpoint = getTrustedExternalUrl(endpoint, {
-      allowedHostnames: trustedHostnames.contactFormEndpoint,
-    });
     const formData = new FormData(formElement);
     const honeypot = String(formData.get('company') ?? '').trim();
 
@@ -204,9 +204,11 @@ export function ContactForm() {
 
   return (
     <form
+      action={trustedEndpoint || undefined}
       aria-describedby={feedback ? 'contact-form-feedback' : undefined}
       className="section-card space-y-5"
       data-hydrated={isHydrated}
+      method="post"
       noValidate
       onSubmit={handleSubmit}
     >
