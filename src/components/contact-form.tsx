@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 
 import { getTrustedExternalUrl, trustedHostnames } from '@/lib/security';
 import { integrationSettings } from '@/lib/site-content';
@@ -25,6 +25,18 @@ const initialValues: FormValues = {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const validationOrder: Array<keyof FormValues> = ['name', 'email', 'message'];
+
+function subscribeToHydration() {
+  return () => {};
+}
+
+function getClientHydrationSnapshot() {
+  return true;
+}
+
+function getServerHydrationSnapshot() {
+  return false;
+}
 
 function validateFields(values: FormValues): FieldErrors {
   const errors: FieldErrors = {};
@@ -52,6 +64,11 @@ export function ContactForm() {
   const [values, setValues] = useState<FormValues>(initialValues);
   const [state, setState] = useState<FormState>('idle');
   const [feedback, setFeedback] = useState('');
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -189,6 +206,7 @@ export function ContactForm() {
     <form
       aria-describedby={feedback ? 'contact-form-feedback' : undefined}
       className="section-card space-y-5"
+      data-hydrated={isHydrated}
       noValidate
       onSubmit={handleSubmit}
     >
@@ -303,8 +321,8 @@ export function ContactForm() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           className="heading-section pressable inline-flex min-h-12 items-center justify-center rounded-2xl bg-stone-950 px-6 text-sm font-bold text-stone-50 uppercase hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-70"
-          disabled={isSubmitting}
-          type="submit"
+          disabled={!isHydrated || isSubmitting}
+          type={isHydrated ? 'submit' : 'button'}
         >
           {isSubmitting ? 'Sending...' : 'Send Message'}
         </button>

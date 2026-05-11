@@ -25,6 +25,38 @@ export type PolicySection = {
   paragraphs: string[];
 };
 
+export type CommunityItem = {
+  name: string;
+  description?: string;
+  href?: string;
+  image?: {
+    alt: string;
+    height: number;
+    src: string;
+    width: number;
+  };
+  socials?: SocialLink[];
+};
+
+export type CommunityContent = {
+  title: string;
+  intro: string;
+  supportedBandsTitle: string;
+  independentShopsTitle: string;
+  emptySupportedBandsMessage: string;
+  emptyIndependentShopsMessage: string;
+  supportedBands: CommunityItem[];
+  independentShops: CommunityItem[];
+};
+
+export type HeaderOpenStatusBadgeMode = 'schedule' | 'closed';
+
+export function getHeaderOpenStatusBadgeMode(
+  value: string | undefined,
+): HeaderOpenStatusBadgeMode {
+  return value?.toLowerCase() === 'false' ? 'closed' : 'schedule';
+}
+
 export const bannedMockupValues = [
   "Stafford's Finest Record Shop",
   '12 Example Street',
@@ -77,6 +109,10 @@ export const businessDetails = {
 export const headerContent = {
   logoAlt: 'Double Double Good Music Emporium',
   strapline: "Stafford's Independent Record Shop",
+  openStatusBadgeMode: getHeaderOpenStatusBadgeMode(
+    process.env.NEXT_PUBLIC_SHOW_OPEN_STATUS_BADGE,
+  ),
+  openStatusClosedMessage: 'Shop closed',
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -85,6 +121,7 @@ export const navigationItems: NavigationItem[] = [
   { href: '/sell', label: 'Sell Your Vinyl' },
   { href: '/contact', label: 'Contact' },
   { href: '/reviews', label: 'Reviews' },
+  { href: '/community', label: 'Community' },
 ];
 
 export const socialLinks: SocialLink[] = [
@@ -154,7 +191,7 @@ export const integrationSettings = {
     process.env.NEXT_PUBLIC_REVIEWS_WIDGET_ID ??
     '5c9dd34d-87e7-4dbe-828b-63797bbbfcbb',
   instagramReelEmbedUrl: getTrustedExternalUrl(
-    'https://www.instagram.com/reel/DW-7Ec3DP10/embed/captioned/',
+    'https://www.instagram.com/reel/DW-7Ec3DP10/embed/',
     {
       allowedHostnames: trustedHostnames.instagramEmbed,
     },
@@ -260,6 +297,12 @@ export const sellContent = {
     "If you're thinking about selling, we make it simple.",
     "We're interested in all types of vinyl—from well-loved classics to more obscure finds. Values can vary, but we're always happy to take a look and give you a fair offer.",
   ],
+  stockImage: {
+    alt: 'Stock photo of vinyl records in browsing crates',
+    height: 1200,
+    src: 'https://picsum.photos/seed/sell-vinyl-stock/1800/1200',
+    width: 1800,
+  },
   buyingList: [
     'LPs and 12-inch singles',
     '7-inch singles',
@@ -289,11 +332,26 @@ export const reviewsContent = {
   title: 'Reviews',
 };
 
+export const communityContent: CommunityContent = {
+  title: 'Community',
+  intro:
+    'A home for local bands, friends of the shop, and independent places worth supporting.',
+  supportedBandsTitle: 'Supported bands',
+  independentShopsTitle: 'Independent shops',
+  emptySupportedBandsMessage:
+    'Band links are being gathered and will be added here once confirmed.',
+  emptyIndependentShopsMessage:
+    'Independent shop links are being gathered and will be added here once confirmed.',
+  supportedBands: [],
+  independentShops: [],
+};
+
 export const siteRoutes = [
   '/',
   '/about',
   '/find-us',
   '/sell',
+  '/community',
   '/contact',
   '/reviews',
   '/delivery-returns',

@@ -28,10 +28,12 @@ export default function FindUsPage() {
           <div className="space-y-5">
             {findUsContent.infoBlocks.map((block) => (
               <div key={block.label}>
-                <p className="heading-sub label-with-icon text-sm font-bold text-stone-500 uppercase">
+                <p className="heading-sub text-sm font-bold text-stone-500 uppercase">
                   {block.label}
                 </p>
-                <p className="measure mt-2 whitespace-pre-line">{block.value}</p>
+                <p className="measure mt-2 whitespace-pre-line">
+                  {block.value}
+                </p>
               </div>
             ))}
             <a

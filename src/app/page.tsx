@@ -30,8 +30,8 @@ export default function HomePage() {
                 <p>{homeWhatWeDo.closing}</p>
               </ContentCard>
               <InstagramReelPanel
-                className="rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3 xl:flex-1"
-                embedMinHeightClass="min-h-[24rem] sm:min-h-[28rem] xl:min-h-0"
+                className="xl:flex-1"
+                embedMinHeightClass="h-[24rem] sm:h-[28rem] xl:h-[44rem]"
                 embedUrl={integrationSettings.instagramReelEmbedUrl}
                 fillAvailableHeight
                 heading="New stock"
@@ -39,10 +39,10 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="media-zoom rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3 shadow-[var(--shadow)] xl:h-full">
+            <div className="media-zoom rounded-[1.2rem] xl:h-full">
               <Image
                 alt={homeWhatWeDo.shopfrontImage.alt}
-                className="h-full min-h-[30rem] w-full rounded-[0.9rem] object-cover object-center xl:min-h-full"
+                className="h-full min-h-[30rem] w-full rounded-[1.2rem] object-cover object-center xl:min-h-full"
                 height={homeWhatWeDo.shopfrontImage.height}
                 sizes="(min-width: 1280px) 44vw, 100vw"
                 src={homeWhatWeDo.shopfrontImage.src}

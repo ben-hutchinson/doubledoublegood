@@ -29,9 +29,10 @@ export default function AboutPage() {
           </header>
           <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-start">
             <ImageCarousel
-              className="rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3"
+              className="w-full"
               imageClassName="h-[22rem] sm:h-[26rem]"
               items={carouselItems}
+              showCounter={false}
               showTopBorder={false}
             />
             <article className="space-y-4">
@@ -61,12 +62,12 @@ export default function AboutPage() {
                 ))}
               </div>
             </article>
-            <div className="rounded-[1.1rem] border border-stone-900/12 bg-[color:var(--panel)] p-3">
-              <div className="media-zoom relative h-[22rem] overflow-hidden rounded-[1.2rem] border border-stone-900/12 bg-stone-100 sm:h-[26rem]">
+            <div>
+              <div className="media-zoom relative h-[22rem] overflow-hidden rounded-[1.2rem] bg-stone-100 sm:h-[26rem]">
                 <Image
                   fill
                   alt={aboutContent.ownerImage.alt}
-                  className="absolute inset-0 h-full w-full object-cover object-[50%_24%]"
+                  className="absolute inset-0 h-full w-full rounded-[1.2rem] object-cover object-[50%_24%]"
                   sizes="(min-width: 1024px) 52vw, 100vw"
                   src={aboutContent.ownerImage.src}
                 />

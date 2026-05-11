@@ -1,0 +1,10 @@
+[     296ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     348ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     686ms] [LOG] %c EvalError
+    at nd (https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:74346)
+    at pg (https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:81686)
+    at Iw (https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:229112)
+    at Iu (https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:228738)
+    at https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:230468
+    at https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:230474
+    at https://client.px-cloud.net/PXeBumDLwe/main.min.js:2:230939 @ https://client.px-cloud.net/PXeBumDLwe/main.min.js:1

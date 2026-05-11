@@ -5,11 +5,17 @@ import {
   aboutContent,
   bannedMockupValues,
   businessDetails,
+  communityContent,
   homeWhatWeDo,
   integrationSettings,
+  getHeaderOpenStatusBadgeMode,
   navigationItems,
   siteRoutes,
 } from '../src/lib/site-content';
+import {
+  getOpenStatusMessage,
+  parseWeeklyOpeningHours,
+} from '../src/lib/open-status';
 
 const routes = [...siteRoutes];
 
@@ -69,10 +75,30 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
+  test('header logo has rounded corners and a soft edge fade', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const logo = page.getByRole('img', {
+      name: 'Double Double Good Music Emporium',
+    });
+
+    await expect(logo).toHaveCSS('border-radius', '19.2px');
+    await expect(logo).toHaveCSS('mask-image', /gradient/);
+  });
+
   test('primary and footer navigation cover the required routes', async ({
     page,
   }) => {
     await page.goto('/');
+
+    const primaryLabels = await page
+      .getByRole('navigation', { name: 'Primary' })
+      .getByRole('link')
+      .allTextContents();
+
+    expect(primaryLabels.at(-1)).toBe('Community');
 
     for (const item of navigationItems) {
       await expect(
@@ -86,6 +112,63 @@ test.describe('public routes', () => {
     await expect(
       page.getByRole('link', { name: 'Privacy Policy' }),
     ).toBeVisible();
+  });
+
+  test('header shows the open status badge and footer keeps opening times simple', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    await expect(
+      page
+        .locator('header')
+        .getByText(/^(Open now|Shop closed)/)
+        .first(),
+    ).toBeVisible();
+    await expect(
+      page.locator('footer').getByText(/^(Open now|Shop closed)/),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('footer').getByText('Tuesday - 10:00 - 17:00'),
+    ).toBeVisible();
+  });
+
+  test('open status feature flag switches the header badge to a closed message', () => {
+    expect(getHeaderOpenStatusBadgeMode(undefined)).toBe('schedule');
+    expect(getHeaderOpenStatusBadgeMode('true')).toBe('schedule');
+    expect(getHeaderOpenStatusBadgeMode('false')).toBe('closed');
+    expect(getHeaderOpenStatusBadgeMode('FALSE')).toBe('closed');
+  });
+
+  test('open status automation only shows open during opening hours', () => {
+    const schedule = parseWeeklyOpeningHours(
+      businessDetails.weeklyOpeningHours,
+    );
+
+    expect(
+      getOpenStatusMessage(schedule, {
+        minutesNow: 9 * 60 + 59,
+        weekday: 'Wednesday',
+      }),
+    ).toBe('Shop closed');
+    expect(
+      getOpenStatusMessage(schedule, {
+        minutesNow: 10 * 60,
+        weekday: 'Wednesday',
+      }),
+    ).toBe('Open now · closes 17:00');
+    expect(
+      getOpenStatusMessage(schedule, {
+        minutesNow: 17 * 60,
+        weekday: 'Wednesday',
+      }),
+    ).toBe('Shop closed');
+    expect(
+      getOpenStatusMessage(schedule, {
+        minutesNow: 12 * 60,
+        weekday: 'Sunday',
+      }),
+    ).toBe('Shop closed');
   });
 
   test('mobile navigation remains visible and stacked', async ({ page }) => {
@@ -109,31 +192,50 @@ test.describe('public routes', () => {
     ).toHaveAttribute('aria-current', 'page');
   });
 
-  test('about page carousel supports manual controls and pauses while focused', async ({
+  test('about page carousel renders without visible controls or counter', async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/about/');
+    await page.mouse.move(1, 1);
 
     const carousel = page.getByLabel('Shop image carousel');
-    const counter = carousel.locator('p', { hasText: '/' });
-    const pauseButton = carousel.getByRole('button', {
-      name: 'Pause autoplay',
-    });
-    const nextButton = carousel.getByRole('button', { name: 'Next' });
-    const previousButton = carousel.getByRole('button', { name: 'Previous' });
 
-    await expect(previousButton).toBeVisible();
-    await expect(nextButton).toBeVisible();
-    await expect(pauseButton).toBeVisible();
+    await expect(carousel.getByRole('button')).toHaveCount(0);
+    await expect(carousel.getByText(/^\d+\s*\/\s*\d+$/)).toHaveCount(0);
+    await expect(carousel.locator('.media-zoom').first()).toHaveCSS(
+      'border-radius',
+      '19.2px',
+    );
+  });
 
-    const initialCounter = (await counter.textContent())?.trim();
-    await nextButton.click();
-    await expect(counter).not.toHaveText(initialCounter ?? '');
+  test('home and about section panels do not offset text with card outlines', async ({
+    page,
+  }) => {
+    await page.goto('/');
 
-    const counterAfterManualNext = (await counter.textContent())?.trim();
-    await previousButton.focus();
-    await page.waitForTimeout(4200);
-    await expect(counter).toHaveText(counterAfterManualNext ?? '');
+    const homeSectionPanel = page.locator('.surface-stack > section').first();
+    await expect(homeSectionPanel).toHaveCSS('border-top-style', 'none');
+    await expect(homeSectionPanel).toHaveCSS('padding-left', '0px');
+
+    await page.goto('/about/');
+
+    const aboutSectionPanel = page.locator('.surface-stack > section').first();
+    await expect(aboutSectionPanel).toHaveCSS('border-top-style', 'none');
+    await expect(aboutSectionPanel).toHaveCSS('padding-left', '0px');
+  });
+
+  test('home instagram reel fills more horizontal space while preserving height', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto('/');
+
+    const instagramFrame = page.locator('iframe[title*=Instagram]');
+    const frameBox = await instagramFrame.boundingBox();
+
+    expect(frameBox?.width).toBeGreaterThan(520);
+    expect(frameBox?.height).toBeGreaterThan(650);
   });
 
   test('about page carousel disables autoplay for reduced motion users', async ({
@@ -143,15 +245,24 @@ test.describe('public routes', () => {
     await page.goto('/about/');
 
     const carousel = page.getByLabel('Shop image carousel');
-    const counter = carousel.locator('p', { hasText: '/' });
-    const reducedMotionPauseButton = carousel.getByRole('button', {
-      name: 'Resume autoplay',
-    });
 
-    await expect(reducedMotionPauseButton).toBeVisible();
-    const initialCounter = (await counter.textContent())?.trim();
-    await page.waitForTimeout(4200);
-    await expect(counter).toHaveText(initialCounter ?? '');
+    await expect(carousel.getByRole('button')).toHaveCount(0);
+    await expect(carousel.getByText(/^\d+\s*\/\s*\d+$/)).toHaveCount(0);
+  });
+
+  test('site photos use consistent rounded corners', async ({ page }) => {
+    await page.goto('/');
+    await expect(
+      page.getByRole('img', { name: homeWhatWeDo.shopfrontImage.alt }),
+    ).toHaveCSS('border-radius', '19.2px');
+
+    await page.goto('/about/');
+    await expect(
+      page.getByLabel('Shop image carousel').locator('.media-zoom').first(),
+    ).toHaveCSS('border-radius', '19.2px');
+    await expect(
+      page.getByRole('img', { name: aboutContent.ownerImage.alt }),
+    ).toHaveCSS('border-radius', '19.2px');
   });
 
   test('find us page contains the correct facts and directions link', async ({
@@ -173,6 +284,33 @@ test.describe('public routes', () => {
     await expect(
       page.locator('footer').getByText('Tuesday - 10:00 - 17:00'),
     ).toBeVisible();
+    await expect(
+      page.locator('main .label-with-icon, footer .label-with-icon'),
+    ).toHaveCount(0);
+  });
+
+  test('community page launches with scaffolded copy and no fake entries', async ({
+    page,
+  }) => {
+    await page.goto('/community/');
+
+    await expect(
+      page.getByRole('heading', { name: communityContent.title, level: 1 }),
+    ).toBeVisible();
+    await expect(page.getByText(communityContent.intro)).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: communityContent.supportedBandsTitle }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', {
+        name: communityContent.independentShopsTitle,
+      }),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Community' })).toHaveCount(2);
+
+    const bodyText = await page.locator('body').innerText();
+    expect(bodyText.toLowerCase()).not.toContain('placeholder');
+    expect(bodyText).not.toContain('Example');
   });
 
   test('contact form renders required fields and submit control', async ({
@@ -182,6 +320,7 @@ test.describe('public routes', () => {
 
     const contactForm = page.locator('main form').first();
 
+    await expect(contactForm).toHaveAttribute('data-hydrated', 'true');
     await expect(contactForm.getByLabel('Name')).toBeVisible();
     await expect(contactForm.getByLabel('Email')).toBeVisible();
     await expect(contactForm.getByLabel('Phone (optional)')).toBeVisible();
@@ -197,8 +336,13 @@ test.describe('public routes', () => {
     await page.goto('/contact/');
 
     const contactForm = page.locator('main form').first();
+    const submitButton = contactForm.getByRole('button', {
+      name: 'Send Message',
+    });
 
-    await contactForm.getByRole('button', { name: 'Send Message' }).click();
+    await expect(contactForm).toHaveAttribute('data-hydrated', 'true');
+    await submitButton.scrollIntoViewIfNeeded();
+    await submitButton.click();
     await expect(contactForm.getByLabel('Name')).toBeFocused();
     await expect(contactForm.getByLabel('Name')).toHaveAttribute(
       'aria-invalid',
@@ -269,6 +413,8 @@ test.describe('public routes', () => {
       'title',
       'Join the Double Double Good mailing list',
     );
+    await expect(beehiivEmbed).toHaveCSS('height', '47px');
+    await expect(beehiivEmbed).toHaveCSS('max-width', '100%');
   });
 
   test('no mockup placeholders leak into public routes', async ({ page }) => {

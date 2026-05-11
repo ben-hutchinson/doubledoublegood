@@ -31,7 +31,7 @@ export default function RootLayout({
         <div className="main-layer flex min-h-screen flex-col" id="top">
           <SiteHeader />
           <main
-            className="min-w-0 flex-1 px-4 pt-6 pb-8 lg:px-6 2xl:px-8"
+            className="site-content-gutter min-w-0 flex-1 pt-6 pb-8"
             id="main-content"
           >
             {children}

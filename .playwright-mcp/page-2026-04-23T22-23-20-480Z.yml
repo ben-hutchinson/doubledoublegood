@@ -1,0 +1,209 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link "Double Double Good Music Emporium" [ref=e8] [cursor=pointer]:
+            - /url: /
+            - img "Double Double Good Music Emporium" [ref=e9]
+          - paragraph [ref=e11]: Stafford's Independent Record Shop
+        - generic [ref=e12]:
+          - paragraph [ref=e13]: Shop closed
+          - list [ref=e15]:
+            - listitem [ref=e16]:
+              - link "Facebook" [ref=e17] [cursor=pointer]:
+                - /url: https://www.facebook.com/DoubleGoodMusic/
+                - img [ref=e18]
+                - generic [ref=e20]: Facebook
+            - listitem [ref=e21]:
+              - link "X" [ref=e22] [cursor=pointer]:
+                - /url: https://twitter.com/doublegoodmusic
+                - img [ref=e23]
+                - generic [ref=e26]: X
+            - listitem [ref=e27]:
+              - link "Instagram" [ref=e28] [cursor=pointer]:
+                - /url: https://www.instagram.com/doublegoodmusic
+                - img [ref=e29]
+                - generic [ref=e33]: Instagram
+            - listitem [ref=e34]:
+              - link "Discogs" [ref=e35] [cursor=pointer]:
+                - /url: https://www.discogs.com/seller/Double_Double_Good/profile
+                - img [ref=e36]
+                - generic [ref=e45]: Discogs
+            - listitem [ref=e46]:
+              - link "Email" [ref=e47] [cursor=pointer]:
+                - /url: mailto:thedoublegood@gmail.com
+                - img [ref=e48]
+                - generic [ref=e51]: Email
+            - listitem [ref=e52]:
+              - link "Phone" [ref=e53] [cursor=pointer]:
+                - /url: tel:01785562657
+                - img [ref=e54]
+                - generic [ref=e56]: Phone
+      - navigation "Primary" [ref=e57]:
+        - list [ref=e58]:
+          - listitem [ref=e59]:
+            - link "About" [ref=e60] [cursor=pointer]:
+              - /url: /about/
+          - listitem [ref=e61]:
+            - link "Find Us" [ref=e62] [cursor=pointer]:
+              - /url: /find-us/
+          - listitem [ref=e63]:
+            - link "Sell Your Vinyl" [ref=e64] [cursor=pointer]:
+              - /url: /sell/
+          - listitem [ref=e65]:
+            - link "Contact" [ref=e66] [cursor=pointer]:
+              - /url: /contact/
+          - listitem [ref=e67]:
+            - link "Reviews" [ref=e68] [cursor=pointer]:
+              - /url: /reviews/
+          - listitem [ref=e69]:
+            - link "Community" [ref=e70] [cursor=pointer]:
+              - /url: /community/
+    - main [ref=e71]:
+      - generic [ref=e72]:
+        - heading "Double Double Good Music Emporium" [level=1] [ref=e73]
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - article [ref=e78]:
+              - heading "What we do" [level=2] [ref=e79]
+              - generic [ref=e80]:
+                - paragraph [ref=e81]: We buy and sell vinyl records across a wide range of genres and formats. Whether you're searching for something specific or just browsing, there's always something new to discover.
+                - paragraph [ref=e82]: "Our stock includes:"
+                - list [ref=e83]:
+                  - listitem [ref=e84]: New and second-hand vinyl
+                  - listitem [ref=e85]: Albums, singles, and LPs
+                  - listitem [ref=e86]: Genres spanning rock, indie, punk, jazz, soul, funk, reggae, folk and more
+                  - listitem [ref=e87]: Rare, collectible, and everyday classics
+                - paragraph [ref=e88]: We're always looking to buy records too. Whether you've got a small selection or a full collection, we offer fair prices and a straightforward, honest approach.
+                - paragraph [ref=e89]: From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.
+            - generic [ref=e90]:
+              - heading "New stock" [level=2] [ref=e92]
+              - iframe [ref=e95]:
+                - generic [ref=f1e5]:
+                  - generic [ref=f1e6]:
+                    - link "doublegoodmusic" [ref=f1e8] [cursor=pointer]:
+                      - /url: https://www.instagram.com/doublegoodmusic/?utm_source=ig_embed
+                      - img "doublegoodmusic" [ref=f1e9]
+                    - generic [ref=f1e10]:
+                      - link "doublegoodmusic" [ref=f1e11] [cursor=pointer]:
+                        - /url: https://www.instagram.com/doublegoodmusic/?utm_source=ig_embed
+                        - generic [ref=f1e12]: doublegoodmusic
+                      - generic [ref=f1e13]: 353 followers
+                    - link "View profile" [ref=f1e15] [cursor=pointer]:
+                      - /url: https://www.instagram.com/doublegoodmusic/?utm_source=ig_embed
+                  - link "Instagram post shared by @doublegoodmusic Play Watch on Instagram" [ref=f1e17] [cursor=pointer]:
+                    - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                    - img "Instagram post shared by @doublegoodmusic"
+                    - generic [ref=f1e18]:
+                      - generic [ref=f1e20]: Play
+                      - generic [ref=f1e21]: Watch on Instagram
+                  - generic [ref=f1e22]:
+                    - link "doublegoodmusic doublegoodmusic 481 posts · 353 followers" [ref=f1e23] [cursor=pointer]:
+                      - /url: https://www.instagram.com/doublegoodmusic/?utm_source=ig_embed
+                      - generic [ref=f1e24]:
+                        - img "doublegoodmusic" [ref=f1e25]
+                        - generic [ref=f1e26]:
+                          - generic [ref=f1e28]: doublegoodmusic
+                          - generic [ref=f1e30]: 481 posts · 353 followers
+                      - generic [ref=f1e31]:
+                        - img [ref=f1e32]
+                        - img [ref=f1e33]
+                    - link "View more on Instagram" [ref=f1e35] [cursor=pointer]:
+                      - /url: https://www.instagram.com/doublegoodmusic/?utm_source=ig_embed
+                  - generic [ref=f1e36]:
+                    - link "Like" [ref=f1e37] [cursor=pointer]:
+                      - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                      - generic: Like
+                    - link "Comment" [ref=f1e39] [cursor=pointer]:
+                      - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                      - generic [ref=f1e41]: Comment
+                    - link "Share" [ref=f1e42] [cursor=pointer]:
+                      - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                      - generic [ref=f1e44]: Share
+                    - link "Save" [ref=f1e45] [cursor=pointer]:
+                      - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                      - generic [ref=f1e47]: Save
+                  - link "6 likes" [ref=f1e49] [cursor=pointer]:
+                    - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                  - generic [ref=f1e50]:
+                    - link "Add a comment..." [ref=f1e51] [cursor=pointer]:
+                      - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                    - link "Instagram" [ref=f1e52] [cursor=pointer]:
+                      - /url: https://www.instagram.com/reel/DW-7Ec3DP10/?utm_source=ig_embed
+                      - generic [ref=f1e54]: Instagram
+          - img "The Double Double Good shopfront at the Ancient High House" [ref=e97]
+    - contentinfo [ref=e98]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - heading "Get in touch" [level=2] [ref=e101]
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - term [ref=e104]: Address
+              - definition [ref=e105]:
+                - generic [ref=e106]: 49 Greengate Street
+                - generic [ref=e107]: Stafford
+                - generic [ref=e108]: ST16 2JA
+            - generic [ref=e109]:
+              - term [ref=e110]: Phone
+              - definition [ref=e111]:
+                - link "01785 562657" [ref=e112] [cursor=pointer]:
+                  - /url: tel:01785562657
+            - generic [ref=e113]:
+              - term [ref=e114]: Email
+              - definition [ref=e115]:
+                - link "thedoublegood@gmail.com" [ref=e116] [cursor=pointer]:
+                  - /url: mailto:thedoublegood@gmail.com
+        - generic [ref=e117]:
+          - heading "Opening times" [level=2] [ref=e118]
+          - paragraph [ref=e119]:
+            - generic [ref=e120]: Monday - CLOSED
+            - generic [ref=e121]: Tuesday - 10:00 - 17:00
+            - generic [ref=e122]: Wednesday - 10:00 - 17:00
+            - generic [ref=e123]: Thursday - 10:00 - 17:00
+            - generic [ref=e124]: Friday - 10:00 - 17:00
+            - generic [ref=e125]: Saturday - 10:00 - 17:00
+            - generic [ref=e126]: Sunday - CLOSED
+        - generic [ref=e127]:
+          - heading "Explore" [level=2] [ref=e128]
+          - list [ref=e129]:
+            - listitem [ref=e130]:
+              - link "About" [ref=e131] [cursor=pointer]:
+                - /url: /about/
+            - listitem [ref=e132]:
+              - link "Find Us" [ref=e133] [cursor=pointer]:
+                - /url: /find-us/
+            - listitem [ref=e134]:
+              - link "Sell Your Vinyl" [ref=e135] [cursor=pointer]:
+                - /url: /sell/
+            - listitem [ref=e136]:
+              - link "Contact" [ref=e137] [cursor=pointer]:
+                - /url: /contact/
+            - listitem [ref=e138]:
+              - link "Reviews" [ref=e139] [cursor=pointer]:
+                - /url: /reviews/
+            - listitem [ref=e140]:
+              - link "Community" [ref=e141] [cursor=pointer]:
+                - /url: /community/
+            - listitem [ref=e142]:
+              - link "Delivery & Returns" [ref=e143] [cursor=pointer]:
+                - /url: /delivery-returns/
+            - listitem [ref=e144]:
+              - link "Privacy Policy" [ref=e145] [cursor=pointer]:
+                - /url: /privacy/
+        - generic [ref=e146]:
+          - heading "Join the mailing list" [level=2] [ref=e147]
+          - paragraph [ref=e148]: Leave your email if you want occasional updates about new stock and shop news.
+          - iframe [ref=e150]:
+            - generic [ref=f2e4]:
+              - textbox "Enter your email" [ref=f2e7]
+              - button "Subscribe" [ref=f2e8]
+      - generic [ref=e151]:
+        - generic [ref=e152]: © 2026 Double Double Good Music Emporium
+        - link "Back to top" [ref=e153] [cursor=pointer]:
+          - /url: "#top"
+  - button "Open Next.js Dev Tools" [ref=e159] [cursor=pointer]:
+    - img [ref=e160]
+  - alert [ref=e163]

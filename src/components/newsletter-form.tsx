@@ -33,14 +33,14 @@ export function NewsletterForm() {
   }
 
   return (
-    <div className="embed-shell w-full max-w-[36rem] overflow-hidden rounded-[0.7rem]">
+    <div className="embed-shell h-[47px] max-h-[47px] w-full max-w-[25rem] overflow-hidden">
       {trustedScriptUrl ? (
         <Script async src={trustedScriptUrl} strategy="afterInteractive" />
       ) : null}
       {!loaded ? <div className="embed-skeleton" /> : null}
       <iframe
         allow="fullscreen"
-        className={`beehiiv-embed block w-full max-w-full border-0 transition-opacity duration-300 ${
+        className={`beehiiv-embed block h-[47px] max-h-[47px] w-full max-w-full border-0 transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
         }`}
         data-test-id="beehiiv-embed"
@@ -51,8 +51,8 @@ export function NewsletterForm() {
         scrolling="no"
         src={trustedFormUrl}
         style={{
-          width: '100%',
-          height: '207px',
+          width: '400px',
+          height: '47px',
           margin: '0',
           borderRadius: '0',
           backgroundColor: 'transparent',

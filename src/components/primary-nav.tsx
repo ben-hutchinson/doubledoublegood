@@ -14,7 +14,7 @@ export function PrimaryNav({ items }: PrimaryNavProps) {
 
   return (
     <nav aria-label="Primary" className="bg-stone-950">
-      <ul className="grid w-full gap-x-3 gap-y-1 px-4 py-3 text-center sm:grid-cols-5 lg:px-6 2xl:px-8">
+      <ul className="site-content-gutter grid w-full gap-x-3 gap-y-1 py-3 text-center sm:grid-cols-3 lg:grid-cols-6">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||

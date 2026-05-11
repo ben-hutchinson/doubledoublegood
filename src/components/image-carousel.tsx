@@ -25,7 +25,6 @@ export function ImageCarousel({
 }: ImageCarouselProps) {
   const [index, setIndex] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [isUserPaused, setIsUserPaused] = useState(false);
   const [isHoverPaused, setIsHoverPaused] = useState(false);
   const [isFocusPaused, setIsFocusPaused] = useState(false);
 
@@ -48,7 +47,6 @@ export function ImageCarousel({
   const shouldAutoRotate =
     hasMultipleItems &&
     !prefersReducedMotion &&
-    !isUserPaused &&
     !isHoverPaused &&
     !isFocusPaused;
 
@@ -85,14 +83,6 @@ export function ImageCarousel({
     .filter(Boolean)
     .join(' ');
 
-  function goToPreviousSlide() {
-    setIndex((current) => (current - 1 + items.length) % items.length);
-  }
-
-  function goToNextSlide() {
-    setIndex((current) => (current + 1) % items.length);
-  }
-
   return (
     <section
       aria-label="Shop image carousel"
@@ -126,34 +116,6 @@ export function ImageCarousel({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {hasMultipleItems ? (
-            <>
-              <button
-                className="rounded-xl border border-stone-900/25 bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-stone-200"
-                onClick={goToPreviousSlide}
-                type="button"
-              >
-                Previous
-              </button>
-              <button
-                className="rounded-xl border border-stone-900/25 bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-stone-200"
-                onClick={goToNextSlide}
-                type="button"
-              >
-                Next
-              </button>
-              <button
-                aria-pressed={isUserPaused || prefersReducedMotion}
-                className="rounded-xl border border-stone-900/25 bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-stone-200"
-                onClick={() => setIsUserPaused((current) => !current)}
-                type="button"
-              >
-                {isUserPaused || prefersReducedMotion
-                  ? 'Resume autoplay'
-                  : 'Pause autoplay'}
-              </button>
-            </>
-          ) : null}
           {showCounter ? (
             <p
               aria-live="polite"

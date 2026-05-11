@@ -10,6 +10,7 @@ test('contact form submits through configured endpoint without opening a mail ap
   const contactForm = page.locator('main form').first();
   const endpoint = integrationSettings.contactFormEndpoint.trim();
 
+  await expect(contactForm).toHaveAttribute('data-hydrated', 'true');
   await contactForm.getByLabel('Name').fill('Test Person');
   await contactForm.getByLabel('Email').fill('test@example.com');
   await contactForm.getByLabel('Phone (optional)').fill('01234 567890');
@@ -17,8 +18,13 @@ test('contact form submits through configured endpoint without opening a mail ap
     .getByLabel('Message')
     .fill('Interested in your latest arrivals.');
 
+  const submitButton = contactForm.getByRole('button', {
+    name: 'Send Message',
+  });
+  await submitButton.scrollIntoViewIfNeeded();
+
   if (!endpoint) {
-    await contactForm.getByRole('button', { name: 'Send Message' }).click();
+    await submitButton.click();
     await expect(
       contactForm.getByText(
         'Contact form is temporarily unavailable right now. Please call or email the shop directly.',
@@ -41,7 +47,7 @@ test('contact form submits through configured endpoint without opening a mail ap
     },
   );
 
-  await contactForm.getByRole('button', { name: 'Send Message' }).click();
+  await submitButton.click();
 
   await expect(
     contactForm.getByText("Thanks, we'll get back to you soon."),
