@@ -1,0 +1,57 @@
+# To better understand this file read this:
+# https://docs.ionos.space/docs/github-actions-customization/
+
+name: "Deploy Now: Execute Build"
+
+on:
+  workflow_call:
+    inputs:
+      site-url:
+        required: true
+        type: string
+      branch-id:
+        required: true
+        type: string
+
+env:
+  DEPLOYMENT_FOLDER: out
+
+jobs:
+# Please do not rename this job
+  build-project:
+    name: build doubledoublegood
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: v20
+
+      - name: Build Node assets
+        env:
+          CI: true
+          NEXT_PUBLIC_BEEHIIV_FORM_ID: 2c951e96-3dbb-4a70-adfb-bae21efd6b7b
+          NEXT_PUBLIC_CONTACT_FORM_ENDPOINT: https://formspree.io/f/xqenwbzd
+          NEXT_PUBLIC_SITE_URL: https://doubledoublegood.co.uk
+          SITE_URL: ${{ inputs.site-url }}
+        run: |
+          npm ci
+          npm run build
+
+# Please do not touch the following action
+      - name: Store deployment content
+        uses: ionos-deploy-now/artifact-action@v1
+        with:
+          api-key: ${{ secrets.IONOS_API_KEY }}
+          service-host: api-eu.ionos.space
+          project-id: 2eaa4a43-d2d8-4961-837e-c376abd5d9cf
+          branch-id: ${{ inputs.branch-id }}
+          version: ${{ github.sha }}
+          folder: ${{ env.DEPLOYMENT_FOLDER }}
+          config-file: .deploy-now/doubledoublegood/config.yaml
+          action: upload
