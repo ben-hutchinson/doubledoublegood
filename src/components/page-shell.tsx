@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 type PageShellProps = {
   title: string;
   intro?: string;
-  children: ReactNode;
+  children?: ReactNode;
   titleAs?: 'h1' | 'h2';
 };
 
@@ -31,7 +31,9 @@ export function PageShell({
         ) : null}
       </header>
       <div aria-hidden className="subtle-divider reveal-in reveal-delay-1" />
-      <div className="reveal-in reveal-delay-2">{children}</div>
+      {children ? (
+        <div className="reveal-in reveal-delay-2">{children}</div>
+      ) : null}
     </section>
   );
 }

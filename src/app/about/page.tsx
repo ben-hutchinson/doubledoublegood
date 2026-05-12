@@ -54,25 +54,17 @@ export default function AboutPage() {
               {aboutContent.ownerHeading}
             </h2>
           </header>
-          <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-start">
-            <article className="space-y-4">
-              <div className="measure space-y-4 text-base leading-7 text-stone-700">
-                {aboutContent.ownerParagraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-            </article>
-            <div>
-              <div className="media-zoom relative h-[22rem] overflow-hidden rounded-[1.2rem] bg-stone-100 sm:h-[26rem]">
-                <Image
-                  fill
-                  alt={aboutContent.ownerImage.alt}
-                  className="absolute inset-0 h-full w-full rounded-[1.2rem] object-cover object-[50%_24%]"
-                  sizes="(min-width: 1024px) 52vw, 100vw"
-                  src={aboutContent.ownerImage.src}
-                />
-              </div>
-            </div>
+          <div className="media-zoom relative h-[24rem] w-full overflow-hidden rounded-[1.2rem] bg-stone-100 sm:h-[34rem] lg:h-[42rem]">
+            <Image
+              fill
+              alt={aboutContent.ownerImage.alt}
+              className="absolute inset-0 h-full w-full rounded-[1.2rem] object-cover"
+              sizes="100vw"
+              src={aboutContent.ownerImage.src}
+              style={{
+                objectPosition: aboutContent.ownerImage.objectPosition,
+              }}
+            />
           </div>
         </section>
       </div>

@@ -11,6 +11,7 @@ import {
   integrationSettings,
   getHeaderOpenStatusBadgeMode,
   navigationItems,
+  sellContent,
   siteRoutes,
 } from '../src/lib/site-content';
 import {
@@ -115,6 +116,21 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
+  test('delivery and returns page omits the old checkout disclaimer', async ({
+    page,
+  }) => {
+    await page.goto('/delivery-returns/');
+
+    await expect(
+      page.getByRole('heading', { name: 'Delivery & Returns', level: 1 }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        'This V1 website is informational and does not offer an online checkout.',
+      ),
+    ).toHaveCount(0);
+  });
+
   test('header shows the open status badge and footer keeps opening times simple', async ({
     page,
   }) => {
@@ -204,15 +220,33 @@ test.describe('public routes', () => {
 
     await expect(carousel.getByRole('button')).toHaveCount(0);
     await expect(carousel.getByText(/^\d+\s*\/\s*\d+$/)).toHaveCount(0);
-    await expect(carousel.locator('img')).toHaveCount(10);
+    await expect(carousel.locator('img')).toHaveCount(16);
+    await expect(carousel.locator('img').first()).toHaveCSS(
+      'object-fit',
+      'cover',
+    );
+    await expect(carousel.locator('img').first()).toHaveCSS(
+      'object-position',
+      carouselItems[0].objectPosition ?? '50% 50%',
+    );
     await expect(carousel.locator('.media-zoom').first()).toHaveCSS(
       'border-radius',
       '19.2px',
     );
-    expect(carouselItems).toHaveLength(10);
+    expect(carouselItems).toHaveLength(16);
     expect(carouselItems.every((item) => item.src.startsWith('/assets/shop-carousel/'))).toBe(
       true,
     );
+
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const carouselBox = await carousel.locator('.media-zoom').boundingBox();
+      const shopCopyBox = await page
+        .locator('main article')
+        .first()
+        .boundingBox();
+
+      expect(carouselBox?.y).toBeCloseTo(shopCopyBox?.y ?? 0, 0);
+    }
   });
 
   test('home and about section panels do not offset text with card outlines', async ({
@@ -264,14 +298,21 @@ test.describe('public routes', () => {
     await page.mouse.move(1, 1);
 
     const carousel = page.getByLabel('Shop image carousel');
-    const firstImage = carousel.locator(`img[alt="${carouselItems[0].alt}"]`);
-    const secondImage = carousel.locator(`img[alt="${carouselItems[1].alt}"]`);
+    const getActiveImageIndex = async () =>
+      carousel.locator('img').evaluateAll((images) =>
+        images.findIndex((image) =>
+          image.className.toString().includes('opacity-100'),
+        ),
+      );
 
-    await expect(firstImage).toHaveCSS('opacity', '1');
-    await expect(secondImage).toHaveCSS('opacity', '0');
+    const activeImageIndex = await getActiveImageIndex();
+    expect(activeImageIndex).toBeGreaterThanOrEqual(0);
+
     await page.waitForTimeout(3300);
-    await expect(firstImage).toHaveCSS('opacity', '0');
-    await expect(secondImage).toHaveCSS('opacity', '1');
+
+    await expect
+      .poll(getActiveImageIndex)
+      .toBe((activeImageIndex + 1) % carouselItems.length);
   });
 
   test('site photos use consistent rounded corners', async ({ page }) => {
@@ -323,18 +364,56 @@ test.describe('public routes', () => {
     ).toBeVisible();
     await expect(page.getByText(communityContent.intro)).toBeVisible();
     await expect(
-      page.getByRole('heading', { name: communityContent.supportedBandsTitle }),
-    ).toBeVisible();
+      page.getByRole('heading', { name: 'Supported bands' }),
+    ).toHaveCount(0);
     await expect(
       page.getByRole('heading', {
-        name: communityContent.independentShopsTitle,
+        name: 'Independent shops',
       }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Community' })).toHaveCount(2);
 
     const bodyText = await page.locator('body').innerText();
+    expect(communityContent.intro).toBe(
+      'COMING SOON! Stay tuned for news on the shop and our wider community.',
+    );
+    expect(bodyText).not.toContain(
+      'Band links are being gathered and will be added here once confirmed.',
+    );
+    expect(bodyText).not.toContain(
+      'Independent shop links are being gathered and will be added here once confirmed.',
+    );
     expect(bodyText.toLowerCase()).not.toContain('placeholder');
     expect(bodyText).not.toContain('Example');
+  });
+
+  test('sell page rotates cropped local vinyl photos in the existing image slot', async ({
+    page,
+  }) => {
+    await page.goto('/sell/');
+
+    const carousel = page.getByLabel('Sell vinyl image carousel');
+
+    await expect(carousel.locator('img')).toHaveCount(2);
+    await expect(carousel.locator('img').first()).toHaveCSS(
+      'object-fit',
+      'cover',
+    );
+    await expect(carousel.locator('img').first()).toHaveCSS(
+      'object-position',
+      sellContent.carouselItems[0].objectPosition ?? '50% 50%',
+    );
+    const imageBox = await carousel.locator('.media-zoom').first().boundingBox();
+
+    expect(imageBox?.height).toBeGreaterThanOrEqual(220);
+    expect(imageBox?.height).toBeLessThanOrEqual(300);
+    expect(sellContent.carouselRotationMs).toBe(5000);
+    expect(sellContent.carouselItems).toHaveLength(2);
+    expect(
+      sellContent.carouselItems.every((item) =>
+        item.src.startsWith('/assets/sell-carousel/'),
+      ),
+    ).toBe(true);
   });
 
   test('contact form renders required fields and submit control', async ({
@@ -437,8 +516,17 @@ test.describe('public routes', () => {
       page.getByRole('heading', { name: aboutContent.ownerHeading }),
     ).toBeVisible();
     await expect(
-      page.getByText(aboutContent.ownerParagraphs[0], { exact: false }),
-    ).toBeVisible();
+      page.getByText('Owner story placeholder copy goes here for now.'),
+    ).toHaveCount(0);
+
+    const ownerImage = page.getByRole('img', {
+      name: aboutContent.ownerImage.alt,
+    });
+    const mainBox = await page.locator('main').boundingBox();
+    const imageBox = await ownerImage.boundingBox();
+
+    await expect(ownerImage).toBeVisible();
+    expect(imageBox?.width).toBeGreaterThan((mainBox?.width ?? 0) * 0.8);
   });
 
   test('newsletter section renders the Beehiiv embed form', async ({

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 
 import { ContentCard } from '@/components/content-card';
+import { ImageCarousel } from '@/components/image-carousel';
 import { PageShell } from '@/components/page-shell';
 import { createPageMetadata } from '@/lib/metadata';
 import { sellContent } from '@/lib/site-content';
@@ -23,16 +23,17 @@ export default function SellPage() {
             ))}
           </ul>
         </ContentCard>
-        <div className="media-zoom self-stretch rounded-[1.2rem] border border-stone-900/12 bg-stone-100">
-          <Image
-            alt={sellContent.stockImage.alt}
-            className="h-60 w-full rounded-[1.2rem] object-cover sm:h-72 lg:h-full"
-            height={sellContent.stockImage.height}
-            sizes="(min-width: 1024px) 30vw, 100vw"
-            src={sellContent.stockImage.src}
-            width={sellContent.stockImage.width}
-          />
-        </div>
+        <ImageCarousel
+          ariaLabel="Sell vinyl image carousel"
+          className="h-full self-stretch"
+          contentClassName="h-full"
+          imageClassName="h-60 sm:h-72 lg:h-full"
+          imageSizes="(min-width: 1024px) 30vw, 100vw"
+          items={sellContent.carouselItems}
+          rotationIntervalMs={sellContent.carouselRotationMs}
+          showCounter={false}
+          showTopBorder={false}
+        />
         <ContentCard title="Sell Your Records">
           {sellContent.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>

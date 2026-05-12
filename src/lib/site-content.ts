@@ -17,6 +17,7 @@ export type SocialLink = {
 
 export type CarouselImage = {
   alt: string;
+  objectPosition?: string;
   src: string;
 };
 
@@ -25,28 +26,9 @@ export type PolicySection = {
   paragraphs: string[];
 };
 
-export type CommunityItem = {
-  name: string;
-  description?: string;
-  href?: string;
-  image?: {
-    alt: string;
-    height: number;
-    src: string;
-    width: number;
-  };
-  socials?: SocialLink[];
-};
-
 export type CommunityContent = {
   title: string;
   intro: string;
-  supportedBandsTitle: string;
-  independentShopsTitle: string;
-  emptySupportedBandsMessage: string;
-  emptyIndependentShopsMessage: string;
-  supportedBands: CommunityItem[];
-  independentShops: CommunityItem[];
 };
 
 export type HeaderOpenStatusBadgeMode = 'schedule' | 'closed';
@@ -205,43 +187,83 @@ export const homeIntro = {
 export const carouselItems: CarouselImage[] = [
   {
     alt: 'Inside Double Double Good with vinyl racks and wall displays',
+    objectPosition: '50% 42%',
     src: '/assets/shop-carousel/shop-interior-01.webp',
   },
   {
     alt: 'Wooden record bins arranged through the upper shop floor',
+    objectPosition: '50% 38%',
     src: '/assets/shop-carousel/shop-interior-03.webp',
   },
   {
     alt: 'Record crates and display sleeves beside the upper shop doorway',
+    objectPosition: '50% 38%',
     src: '/assets/shop-carousel/shop-interior-04.webp',
   },
   {
     alt: 'Rows of vinyl records beneath framed album displays',
+    objectPosition: '50% 42%',
     src: '/assets/shop-carousel/shop-interior-05.webp',
   },
   {
     alt: 'Long wall of records and framed sleeves in the shop',
+    objectPosition: '50% 40%',
     src: '/assets/shop-carousel/shop-interior-02.webp',
   },
   {
     alt: 'Vinyl crates lining the stairway into the shop',
+    objectPosition: '50% 45%',
     src: '/assets/shop-carousel/shop-interior-06.webp',
   },
   {
     alt: 'Shop counter and front window inside the timber-framed building',
+    objectPosition: '50% 48%',
     src: '/assets/shop-carousel/shop-interior-09.webp',
   },
   {
     alt: 'Feature display wall with framed posters and new arrivals',
+    objectPosition: '50% 42%',
     src: '/assets/shop-carousel/shop-interior-08.webp',
   },
   {
     alt: 'Music press collage wall inside Double Double Good',
+    objectPosition: '50% 50%',
     src: '/assets/shop-carousel/shop-interior-07.webp',
   },
   {
     alt: 'Close-up of the music press collage wall',
+    objectPosition: '50% 48%',
     src: '/assets/shop-carousel/shop-interior-10.webp',
+  },
+  {
+    alt: 'Music display corner with records, films, and framed artwork',
+    objectPosition: '50% 40%',
+    src: '/assets/shop-carousel/shop-interior-11.webp',
+  },
+  {
+    alt: 'Display figure and collectibles beside Double Double Good artwork',
+    objectPosition: '50% 44%',
+    src: '/assets/shop-carousel/shop-interior-12.webp',
+  },
+  {
+    alt: 'Front shop area with counter, record bins, and timber beams',
+    objectPosition: '50% 44%',
+    src: '/assets/shop-carousel/shop-interior-13.webp',
+  },
+  {
+    alt: 'Entrance area with music collage wall and record bins',
+    objectPosition: '50% 44%',
+    src: '/assets/shop-carousel/shop-interior-14.webp',
+  },
+  {
+    alt: 'Full-height music collage wall beside timber beams',
+    objectPosition: '50% 45%',
+    src: '/assets/shop-carousel/shop-interior-15.webp',
+  },
+  {
+    alt: 'Turntables and framed artwork in the listening corner',
+    objectPosition: '50% 52%',
+    src: '/assets/shop-carousel/shop-interior-16.webp',
   },
 ];
 
@@ -257,15 +279,10 @@ export const aboutContent = {
     "From a market stall in 2019 to one of Stafford's most historic buildings, everything we do is rooted in a genuine love for records and the people who collect them.",
   ],
   ownerHeading: 'The Owner',
-  ownerSubheading: 'The person behind the counter',
-  ownerParagraphs: [
-    'Owner story placeholder copy goes here for now.',
-    'Use this section to share background, favourite genres, and what customers can expect in the shop.',
-    'When you are ready, this can be swapped for the final owner profile copy.',
-  ],
   ownerImage: {
     alt: 'Lee in the Double Double Good shop',
     height: 1600,
+    objectPosition: '50% 24%',
     src: '/lee.jpg',
     width: 1200,
   },
@@ -289,6 +306,7 @@ export const homeWhatWeDo = {
   shopfrontImage: {
     alt: 'The Double Double Good shopfront at the Ancient High House',
     height: 1600,
+    objectPosition: '50% 46%',
     src: '/shopfront.jpg',
     width: 1200,
   },
@@ -317,12 +335,19 @@ export const sellContent = {
     "If you're thinking about selling, we make it simple.",
     "We're interested in all types of vinyl—from well-loved classics to more obscure finds. Values can vary, but we're always happy to take a look and give you a fair offer.",
   ],
-  stockImage: {
-    alt: 'Stock photo of vinyl records in browsing crates',
-    height: 1200,
-    src: 'https://picsum.photos/seed/sell-vinyl-stock/1800/1200',
-    width: 1800,
-  },
+  carouselItems: [
+    {
+      alt: 'Stacked vinyl records beside headphones',
+      objectPosition: '72% 50%',
+      src: '/assets/sell-carousel/vinyl-sell-01.webp',
+    },
+    {
+      alt: 'Vinyl records and sleeves spread over a wooden surface',
+      objectPosition: '78% 50%',
+      src: '/assets/sell-carousel/vinyl-sell-02.webp',
+    },
+  ],
+  carouselRotationMs: 5000,
   buyingList: [
     'LPs and 12-inch singles',
     '7-inch singles',
@@ -355,15 +380,7 @@ export const reviewsContent = {
 export const communityContent: CommunityContent = {
   title: 'Community',
   intro:
-    'A home for local bands, friends of the shop, and independent places worth supporting.',
-  supportedBandsTitle: 'Supported bands',
-  independentShopsTitle: 'Independent shops',
-  emptySupportedBandsMessage:
-    'Band links are being gathered and will be added here once confirmed.',
-  emptyIndependentShopsMessage:
-    'Independent shop links are being gathered and will be added here once confirmed.',
-  supportedBands: [],
-  independentShops: [],
+    'COMING SOON! Stay tuned for news on the shop and our wider community.',
 };
 
 export const siteRoutes = [
@@ -389,7 +406,6 @@ export const deliveryReturnsSections: PolicySection[] = [
   {
     heading: 'Delivery',
     paragraphs: [
-      'This V1 website is informational and does not offer an online checkout.',
       'If a delivery is arranged directly with the shop, postage options, costs, and timing will be confirmed with you before anything is sent.',
     ],
   },
