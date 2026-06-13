@@ -219,12 +219,20 @@ button:active,
   }
 
   .gig-ticker__track {
-    @apply grid w-[200%] auto-cols-[50%] grid-flow-col items-center;
+    display: flex;
+    width: max-content;
+    align-items: center;
     animation: gig-ticker-marquee 22s linear infinite;
   }
 
   .gig-ticker__text {
-    @apply overflow-hidden pr-10 text-sm font-bold tracking-[0.12em] text-ellipsis whitespace-nowrap uppercase;
+    flex: 0 0 auto;
+    padding-right: 100vw;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    text-transform: uppercase;
   }
 
   .gig-ticker:is(:hover, :focus-within) .gig-ticker__track {
@@ -464,6 +472,7 @@ button:active,
 
     .gig-ticker__text {
       @apply whitespace-normal;
+      padding-right: 0;
     }
 
     .gig-ticker__text + .gig-ticker__text {

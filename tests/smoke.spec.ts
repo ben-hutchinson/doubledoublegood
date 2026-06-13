@@ -171,6 +171,42 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
+  test('mobile gig ticker scrolls the full notice text', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/');
+
+    const tickerMotion = await page.evaluate(async () => {
+      const viewport = document.querySelector('.gig-ticker__viewport');
+      const track = document.querySelector('.gig-ticker__track');
+      const text = document.querySelector('.gig-ticker__text');
+
+      if (!viewport || !track || !text) {
+        return null;
+      }
+
+      const viewportWidth = viewport.getBoundingClientRect().width;
+      const textWidth = text.getBoundingClientRect().width;
+      const firstTransform = window.getComputedStyle(track).transform;
+
+      await new Promise((resolve) => {
+        window.setTimeout(resolve, 650);
+      });
+
+      const secondTransform = window.getComputedStyle(track).transform;
+
+      return {
+        isAnimated: firstTransform !== secondTransform,
+        textWiderThanViewport: textWidth > viewportWidth,
+      };
+    });
+
+    expect(tickerMotion).toEqual({
+      isAnimated: true,
+      textWiderThanViewport: true,
+    });
+  });
+
   test('open status feature flag switches the header badge to a closed message', () => {
     expect(getHeaderOpenStatusBadgeMode(undefined)).toBe('schedule');
     expect(getHeaderOpenStatusBadgeMode('true')).toBe('schedule');
