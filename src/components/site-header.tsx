@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { GigTicker } from '@/components/gig-ticker';
 import { OpenStatusBadge } from '@/components/open-status-badge';
 import { PrimaryNav } from '@/components/primary-nav';
 import { SocialLinks } from '@/components/social-links';
@@ -13,6 +14,7 @@ import {
 export function SiteHeader() {
   return (
     <header className="border-b border-stone-900/12">
+      <GigTicker />
       <div className="site-shell-gutter flex w-full flex-col gap-6 py-5 lg:py-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-2 xl:max-w-[52rem]">

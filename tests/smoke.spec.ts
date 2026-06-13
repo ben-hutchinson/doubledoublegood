@@ -10,8 +10,11 @@ import {
   homeWhatWeDo,
   integrationSettings,
   getHeaderOpenStatusBadgeMode,
+  getGigTickerEnabledMode,
+  gigTickerContent,
   navigationItems,
   sellContent,
+  shouldShowGigTicker,
   siteRoutes,
 } from '../src/lib/site-content';
 import {
@@ -150,11 +153,49 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
+  test('header shows upcoming in-store shows in the gig ticker', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const ticker = page.getByRole('region', {
+      name: 'Upcoming in-store shows',
+    });
+    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
+    const firstEvent = gigTickerContent.events[0];
+
+    await expect(ticker).toBeVisible();
+    await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
+    await expect(
+      visibleTickerText.getByText(firstEvent.message).first(),
+    ).toBeVisible();
+  });
+
   test('open status feature flag switches the header badge to a closed message', () => {
     expect(getHeaderOpenStatusBadgeMode(undefined)).toBe('schedule');
     expect(getHeaderOpenStatusBadgeMode('true')).toBe('schedule');
     expect(getHeaderOpenStatusBadgeMode('false')).toBe('closed');
     expect(getHeaderOpenStatusBadgeMode('FALSE')).toBe('closed');
+  });
+
+  test('gig ticker feature flag only hides the ticker when explicitly false', () => {
+    expect(getGigTickerEnabledMode(undefined)).toBe('enabled');
+    expect(getGigTickerEnabledMode('true')).toBe('enabled');
+    expect(getGigTickerEnabledMode('false')).toBe('hidden');
+    expect(getGigTickerEnabledMode('FALSE')).toBe('hidden');
+    expect(
+      shouldShowGigTicker({
+        enabledMode: 'hidden',
+        events: gigTickerContent.events,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowGigTicker({
+        enabledMode: 'enabled',
+        events: [],
+      }),
+    ).toBe(false);
+    expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
   test('open status automation only shows open during opening hours', () => {
@@ -234,9 +275,11 @@ test.describe('public routes', () => {
       '19.2px',
     );
     expect(carouselItems).toHaveLength(16);
-    expect(carouselItems.every((item) => item.src.startsWith('/assets/shop-carousel/'))).toBe(
-      true,
-    );
+    expect(
+      carouselItems.every((item) =>
+        item.src.startsWith('/assets/shop-carousel/'),
+      ),
+    ).toBe(true);
 
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
       const carouselBox = await carousel.locator('.media-zoom').boundingBox();
@@ -299,11 +342,13 @@ test.describe('public routes', () => {
 
     const carousel = page.getByLabel('Shop image carousel');
     const getActiveImageIndex = async () =>
-      carousel.locator('img').evaluateAll((images) =>
-        images.findIndex((image) =>
-          image.className.toString().includes('opacity-100'),
-        ),
-      );
+      carousel
+        .locator('img')
+        .evaluateAll((images) =>
+          images.findIndex((image) =>
+            image.className.toString().includes('opacity-100'),
+          ),
+        );
 
     const activeImageIndex = await getActiveImageIndex();
     expect(activeImageIndex).toBeGreaterThanOrEqual(0);
@@ -403,7 +448,10 @@ test.describe('public routes', () => {
       'object-position',
       sellContent.carouselItems[0].objectPosition ?? '50% 50%',
     );
-    const imageBox = await carousel.locator('.media-zoom').first().boundingBox();
+    const imageBox = await carousel
+      .locator('.media-zoom')
+      .first()
+      .boundingBox();
 
     expect(imageBox?.height).toBeGreaterThanOrEqual(220);
     expect(imageBox?.height).toBeLessThanOrEqual(300);
@@ -553,6 +601,12 @@ test.describe('public routes', () => {
     await expect(beehiivEmbed).toHaveAttribute(
       'title',
       'Join the Double Double Good mailing list',
+    );
+  });
+
+  test('home instagram reel uses the latest requested reel', () => {
+    expect(integrationSettings.instagramReelEmbedUrl).toBe(
+      'https://www.instagram.com/reel/DZhHOf4IwdH/embed/',
     );
   });
 
