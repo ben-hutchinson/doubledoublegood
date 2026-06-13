@@ -127,7 +127,7 @@ export const gigTickerContent = {
   events: [
     {
       message:
-        'Unfortunately the shop will be shut 18th - 20th July. Back open as usual on Tuesday 23rd. Sorry for any inconvenience.',
+        'The shop will be closed 18th - 22nd June. Back open as usual on Tuesday 23rd. Sorry for any inconvenience.',
     },
   ] satisfies GigTickerEvent[],
 };
