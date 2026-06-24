@@ -127,7 +127,7 @@ export const gigTickerContent = {
   events: [
     {
       message:
-        'The shop will be closed 18th - 22nd June. Back open as usual on Tuesday 23rd. Sorry for any inconvenience.',
+        'Join us in the shop on 4th July @ 1400hrs for live music from the fantastic Santù, performing an intimate in-store acoustic set, perfect for a relaxed afternoon of browsing and listening',
     },
   ] satisfies GigTickerEvent[],
 };
