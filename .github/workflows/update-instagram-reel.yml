@@ -1,0 +1,121 @@
+name: Update Instagram reel
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub schedules are UTC. This runs Saturday at 09:00 UTC,
+    # which is 09:00 GMT or 10:00 BST in Europe/London.
+    - cron: '0 9 * * 6'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-instagram-reel
+  cancel-in-progress: false
+
+env:
+  AUTOMATION_BRANCH: automation/update-instagram-reel
+  INSTAGRAM_USERNAME: doublegoodmusic
+
+jobs:
+  update-instagram-reel:
+    name: Update homepage Instagram reel
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update Instagram reel files
+        id: reel
+        run: node scripts/update-instagram-reel.mjs
+
+      - name: Stop if reel is already current
+        if: steps.reel.outputs.changed != 'true'
+        run: echo "Homepage Instagram reel is already current."
+
+      - name: Run lint
+        if: steps.reel.outputs.changed == 'true'
+        run: npm run lint
+
+      - name: Run typecheck
+        if: steps.reel.outputs.changed == 'true'
+        run: npm run typecheck
+
+      - name: Run Instagram reel script tests
+        if: steps.reel.outputs.changed == 'true'
+        run: npm run test:instagram-reel
+
+      - name: Install Playwright browser
+        if: steps.reel.outputs.changed == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Run test suite
+        if: steps.reel.outputs.changed == 'true'
+        run: npm test
+
+      - name: Run production build
+        if: steps.reel.outputs.changed == 'true'
+        run: npm run build
+
+      - name: Commit and push automation branch
+        if: steps.reel.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$AUTOMATION_BRANCH"
+          git add src/lib/site-content.ts tests/smoke.spec.ts
+          git commit -m "Update homepage Instagram reel"
+          git push --force-with-lease origin "$AUTOMATION_BRANCH"
+
+      - name: Create or update draft pull request
+        if: steps.reel.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_URL: ${{ steps.reel.outputs.new_url }}
+          OLD_URL: ${{ steps.reel.outputs.old_url }}
+          SHORTCODE: ${{ steps.reel.outputs.latest_shortcode }}
+        run: |
+          cat > pr-body.md <<EOF
+          Updates the homepage Instagram reel embed to the latest public @doublegoodmusic reel.
+
+          Old URL: ${OLD_URL}
+          New URL: ${NEW_URL}
+          Latest shortcode: ${SHORTCODE}
+
+          Validation run by this workflow:
+          - npm run lint
+          - npm run typecheck
+          - npm run test:instagram-reel
+          - npm test
+          - npm run build
+          EOF
+
+          if gh pr view "$AUTOMATION_BRANCH" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh pr edit "$AUTOMATION_BRANCH" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Update homepage Instagram reel" \
+              --body-file pr-body.md
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$AUTOMATION_BRANCH" \
+              --title "Update homepage Instagram reel" \
+              --body-file pr-body.md \
+              --draft
+          fi

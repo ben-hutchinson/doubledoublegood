@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test:instagram-reel": "node --test scripts/update-instagram-reel.test.mjs",
     "test": "playwright test"
   },
   "keywords": [
