@@ -8,7 +8,9 @@ import {
   carouselItems,
   communityContent,
   homeWhatWeDo,
+  homeFeatureImages,
   integrationSettings,
+  getHomeFeatureImageVariant,
   getHeaderOpenStatusBadgeMode,
   getGigTickerEnabledMode,
   gigTickerContent,
@@ -232,6 +234,34 @@ test.describe('public routes', () => {
       }),
     ).toBe(false);
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
+  });
+
+  test('home feature image variants support the Santù A/B test posters', () => {
+    expect(getHomeFeatureImageVariant(undefined)).toBe('santu-colour');
+    expect(getHomeFeatureImageVariant('shopfront')).toBe('shopfront');
+    expect(getHomeFeatureImageVariant('santu-bw')).toBe('santu-bw');
+    expect(getHomeFeatureImageVariant('santu-colour')).toBe('santu-colour');
+    expect(getHomeFeatureImageVariant('unknown')).toBe('santu-colour');
+
+    expect(homeFeatureImages.shopfront).toMatchObject({
+      alt: 'The Double Double Good shopfront at the Ancient High House',
+      fit: 'cover',
+      src: '/shopfront.jpg',
+    });
+    expect(homeFeatureImages['santu-bw']).toMatchObject({
+      alt: 'Santù in-store live music poster, black and white version',
+      fit: 'contain',
+      height: 2000,
+      src: '/assets/home/santu-bw.jpg',
+      width: 1414,
+    });
+    expect(homeFeatureImages['santu-colour']).toMatchObject({
+      alt: 'Santù in-store live music poster, colour version',
+      fit: 'contain',
+      height: 2000,
+      src: '/assets/home/santu-colour.jpg',
+      width: 1414,
+    });
   });
 
   test('open status automation only shows open during opening hours', () => {
