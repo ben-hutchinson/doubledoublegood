@@ -8,9 +8,7 @@ import {
   carouselItems,
   communityContent,
   homeWhatWeDo,
-  homeFeatureImages,
   integrationSettings,
-  getHomeFeatureImageVariant,
   getHeaderOpenStatusBadgeMode,
   getGigTickerEnabledMode,
   gigTickerContent,
@@ -25,6 +23,8 @@ import {
 } from '../src/lib/open-status';
 
 const routes = [...siteRoutes];
+const removedGigTickerMessage =
+  'Join us in the shop on 4th July @ 1400hrs for live music from the fantastic Santù, performing an intimate in-store acoustic set, perfect for a relaxed afternoon of browsing and listening';
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -155,7 +155,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header shows upcoming in-store shows in the gig ticker', async ({
+  test('header keeps the shop notice bar without the event ticker text', async ({
     page,
   }) => {
     await page.goto('/');
@@ -163,50 +163,10 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
-    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
-    const firstEvent = gigTickerContent.events[0];
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(
-      visibleTickerText.getByText(firstEvent.message).first(),
-    ).toBeVisible();
-  });
-
-  test('mobile gig ticker scrolls the full notice text', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/');
-
-    const tickerMotion = await page.evaluate(async () => {
-      const viewport = document.querySelector('.gig-ticker__viewport');
-      const track = document.querySelector('.gig-ticker__track');
-      const text = document.querySelector('.gig-ticker__text');
-
-      if (!viewport || !track || !text) {
-        return null;
-      }
-
-      const viewportWidth = viewport.getBoundingClientRect().width;
-      const textWidth = text.getBoundingClientRect().width;
-      const firstTransform = window.getComputedStyle(track).transform;
-
-      await new Promise((resolve) => {
-        window.setTimeout(resolve, 650);
-      });
-
-      const secondTransform = window.getComputedStyle(track).transform;
-
-      return {
-        isAnimated: firstTransform !== secondTransform,
-        textWiderThanViewport: textWidth > viewportWidth,
-      };
-    });
-
-    expect(tickerMotion).toEqual({
-      isAnimated: true,
-      textWiderThanViewport: true,
-    });
+    await expect(ticker.getByText(removedGigTickerMessage)).toHaveCount(0);
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -224,43 +184,22 @@ test.describe('public routes', () => {
     expect(
       shouldShowGigTicker({
         enabledMode: 'hidden',
-        events: gigTickerContent.events,
       }),
     ).toBe(false);
     expect(
       shouldShowGigTicker({
         enabledMode: 'enabled',
-        events: [],
       }),
-    ).toBe(false);
+    ).toBe(true);
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
-  test('home feature image variants support the Santù A/B test posters', () => {
-    expect(getHomeFeatureImageVariant(undefined)).toBe('santu-colour');
-    expect(getHomeFeatureImageVariant('shopfront')).toBe('shopfront');
-    expect(getHomeFeatureImageVariant('santu-bw')).toBe('santu-bw');
-    expect(getHomeFeatureImageVariant('santu-colour')).toBe('santu-colour');
-    expect(getHomeFeatureImageVariant('unknown')).toBe('santu-colour');
-
-    expect(homeFeatureImages.shopfront).toMatchObject({
+  test('home feature image uses the large shopfront photo', () => {
+    expect(homeWhatWeDo.shopfrontImage).toMatchObject({
       alt: 'The Double Double Good shopfront at the Ancient High House',
-      fit: 'cover',
+      height: 1600,
       src: '/shopfront.jpg',
-    });
-    expect(homeFeatureImages['santu-bw']).toMatchObject({
-      alt: 'Santù in-store live music poster, black and white version',
-      fit: 'contain',
-      height: 2000,
-      src: '/assets/home/santu-bw.jpg',
-      width: 1414,
-    });
-    expect(homeFeatureImages['santu-colour']).toMatchObject({
-      alt: 'Santù in-store live music poster, colour version',
-      fit: 'contain',
-      height: 2000,
-      src: '/assets/home/santu-colour.jpg',
-      width: 1414,
+      width: 1200,
     });
   });
 

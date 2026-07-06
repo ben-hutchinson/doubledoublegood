@@ -21,14 +21,6 @@ export type CarouselImage = {
   src: string;
 };
 
-export type HomeFeatureImage = CarouselImage & {
-  fit: 'contain' | 'cover';
-  height: number;
-  width: number;
-};
-
-export type HomeFeatureImageVariant = 'shopfront' | 'santu-bw' | 'santu-colour';
-
 export type PolicySection = {
   heading: string;
   paragraphs: string[];
@@ -43,13 +35,8 @@ export type HeaderOpenStatusBadgeMode = 'schedule' | 'closed';
 
 export type GigTickerEnabledMode = 'enabled' | 'hidden';
 
-export type GigTickerEvent = {
-  message: string;
-};
-
 type GigTickerVisibilityConfig = {
   enabledMode: GigTickerEnabledMode;
-  events: readonly GigTickerEvent[];
 };
 
 export function getHeaderOpenStatusBadgeMode(
@@ -64,27 +51,8 @@ export function getGigTickerEnabledMode(
   return value?.toLowerCase() === 'false' ? 'hidden' : 'enabled';
 }
 
-export function getHomeFeatureImageVariant(
-  value: string | undefined,
-): HomeFeatureImageVariant {
-  const normalizedValue = value?.trim().toLowerCase();
-
-  if (
-    normalizedValue === 'shopfront' ||
-    normalizedValue === 'santu-bw' ||
-    normalizedValue === 'santu-colour'
-  ) {
-    return normalizedValue;
-  }
-
-  return 'santu-colour';
-}
-
-export function shouldShowGigTicker({
-  enabledMode,
-  events,
-}: GigTickerVisibilityConfig) {
-  return enabledMode === 'enabled' && events.length > 0;
+export function shouldShowGigTicker({ enabledMode }: GigTickerVisibilityConfig) {
+  return enabledMode === 'enabled';
 }
 
 export const bannedMockupValues = [
@@ -148,12 +116,6 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [
-    {
-      message:
-        'Join us in the shop on 4th July @ 1400hrs for live music from the fantastic Santù, performing an intimate in-store acoustic set, perfect for a relaxed afternoon of browsing and listening',
-    },
-  ] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -347,33 +309,6 @@ export const aboutContent = {
   },
 };
 
-export const homeFeatureImages = {
-  shopfront: {
-    alt: 'The Double Double Good shopfront at the Ancient High House',
-    fit: 'cover',
-    height: 1600,
-    objectPosition: '50% 46%',
-    src: '/shopfront.jpg',
-    width: 1200,
-  },
-  'santu-bw': {
-    alt: 'Santù in-store live music poster, black and white version',
-    fit: 'contain',
-    height: 2000,
-    objectPosition: '50% 50%',
-    src: '/assets/home/santu-bw.jpg',
-    width: 1414,
-  },
-  'santu-colour': {
-    alt: 'Santù in-store live music poster, colour version',
-    fit: 'contain',
-    height: 2000,
-    objectPosition: '50% 50%',
-    src: '/assets/home/santu-colour.jpg',
-    width: 1414,
-  },
-} satisfies Record<HomeFeatureImageVariant, HomeFeatureImage>;
-
 export const homeWhatWeDo = {
   heading: 'What we do',
   intro:
@@ -389,12 +324,13 @@ export const homeWhatWeDo = {
     "We're always looking to buy records too. Whether you've got a small selection or a full collection, we offer fair prices and a straightforward, honest approach.",
   closing:
     "From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.",
-  shopfrontImage:
-    homeFeatureImages[
-      getHomeFeatureImageVariant(
-        process.env.NEXT_PUBLIC_HOME_FEATURE_IMAGE_VARIANT,
-      )
-    ],
+  shopfrontImage: {
+    alt: 'The Double Double Good shopfront at the Ancient High House',
+    height: 1600,
+    objectPosition: '50% 46%',
+    src: '/shopfront.jpg',
+    width: 1200,
+  },
 };
 
 export const findUsContent = {
