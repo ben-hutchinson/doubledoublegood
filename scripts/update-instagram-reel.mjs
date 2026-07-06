@@ -18,6 +18,13 @@ const targetFiles = [
   path.join(repoRoot, 'tests/smoke.spec.ts'),
 ];
 
+export class InstagramRateLimitError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'InstagramRateLimitError';
+  }
+}
+
 export function buildEmbedUrl(shortcode) {
   if (!shortcode || typeof shortcode !== 'string') {
     throw new Error('Instagram reel shortcode is required.');
@@ -80,6 +87,12 @@ export async function fetchInstagramProfile(username = DEFAULT_USERNAME) {
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new InstagramRateLimitError(
+        `Instagram profile request failed with ${response.status} ${response.statusText}.`,
+      );
+    }
+
     throw new Error(
       `Instagram profile request failed with ${response.status} ${response.statusText}.`,
     );
@@ -118,44 +131,110 @@ async function writeGithubOutput(values) {
   await appendFile(process.env.GITHUB_OUTPUT, `${lines.join('\n')}\n`);
 }
 
-async function main() {
-  const username = process.env.INSTAGRAM_USERNAME ?? DEFAULT_USERNAME;
-  const profile = await fetchInstagramProfile(username);
-  const latestClip = findLatestClip(profile);
-  const nextEmbedUrl = buildEmbedUrl(latestClip.shortcode);
-  const currentSource = await readFile(targetFiles[0], 'utf8');
+export async function runInstagramReelUpdate({
+  username = process.env.INSTAGRAM_USERNAME ?? DEFAULT_USERNAME,
+  fetchProfileImpl = fetchInstagramProfile,
+  readFileImpl = readFile,
+  targetFiles: files = targetFiles,
+  updateFilesImpl = updateInstagramReelFiles,
+  writeGithubOutputImpl = writeGithubOutput,
+} = {}) {
+  const currentSource = await readFileImpl(files[0], 'utf8');
   const currentMatch = currentSource.match(EMBED_URL_PATTERN)?.[0] ?? '';
 
+  let profile;
+
+  try {
+    profile = await fetchProfileImpl(username);
+  } catch (error) {
+    if (error instanceof InstagramRateLimitError) {
+      await writeGithubOutputImpl({
+        blocked: 'true',
+        blocker_reason: 'instagram_rate_limited',
+        changed: 'false',
+        latest_shortcode: '',
+        new_url: '',
+        old_url: currentMatch,
+      });
+
+      process.stdout.write(
+        `Instagram reel lookup blocked by rate limiting; leaving homepage reel unchanged: ${currentMatch}\n`,
+      );
+
+      return {
+        blocked: true,
+        blockerReason: 'instagram_rate_limited',
+        changed: false,
+        oldUrl: currentMatch,
+      };
+    }
+
+    throw error;
+  }
+
+  const latestClip = findLatestClip(profile);
+  const nextEmbedUrl = buildEmbedUrl(latestClip.shortcode);
+
   if (currentMatch === nextEmbedUrl) {
-    await writeGithubOutput({
+    await writeGithubOutputImpl({
+      blocked: 'false',
       changed: 'false',
       latest_shortcode: latestClip.shortcode,
       new_url: nextEmbedUrl,
       old_url: currentMatch,
     });
-    process.stdout.write(
-      `Homepage Instagram reel is already current: ${nextEmbedUrl}\n`,
-    );
-    return;
+
+    return {
+      blocked: false,
+      changed: false,
+      latestShortcode: latestClip.shortcode,
+      newUrl: nextEmbedUrl,
+      oldUrl: currentMatch,
+      status: 'current',
+    };
   }
 
-  const results = await updateInstagramReelFiles(nextEmbedUrl);
+  const results = await updateFilesImpl(nextEmbedUrl);
   const changedFiles = results
     .filter((result) => result.changed)
     .map((result) => path.relative(repoRoot, result.filePath));
 
-  await writeGithubOutput({
+  await writeGithubOutputImpl({
+    blocked: 'false',
     changed: changedFiles.length > 0 ? 'true' : 'false',
     latest_shortcode: latestClip.shortcode,
     new_url: nextEmbedUrl,
     old_url: currentMatch,
   });
 
-  process.stdout.write(
-    `Updated homepage Instagram reel from ${currentMatch}\n`,
-  );
-  process.stdout.write(`Latest Instagram reel: ${nextEmbedUrl}\n`);
-  process.stdout.write(`Changed files: ${changedFiles.join(', ')}\n`);
+  return {
+    blocked: false,
+    changed: changedFiles.length > 0,
+    changedFiles,
+    latestShortcode: latestClip.shortcode,
+    newUrl: nextEmbedUrl,
+    oldUrl: currentMatch,
+    status: 'updated',
+  };
+}
+
+async function main() {
+  const result = await runInstagramReelUpdate();
+
+  if (result.blocked) {
+    return;
+  }
+
+  if (!result.changed) {
+    process.stdout.write(
+      `Homepage Instagram reel is already current: ${result.newUrl}\n`,
+    );
+    return;
+  }
+
+  process.stdout.write(`Updated homepage Instagram reel from ${result.oldUrl}\n`);
+  process.stdout.write(`Latest Instagram reel: ${result.newUrl}\n`);
+  process.stdout.write(`Changed files: ${result.changedFiles.join(', ')}\n`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
