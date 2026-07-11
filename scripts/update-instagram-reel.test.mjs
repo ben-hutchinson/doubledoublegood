@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import {
+  InstagramRateLimitError,
   buildEmbedUrl,
   findLatestClip,
   replaceInstagramEmbedUrl,
+  runInstagramReelUpdate,
 } from './update-instagram-reel.mjs';
 
 describe('update-instagram-reel helpers', () => {
@@ -76,5 +78,50 @@ describe('update-instagram-reel helpers', () => {
       ),
     `,
     );
+  });
+
+  test('runInstagramReelUpdate reports a blocked lookup on Instagram rate limiting', async () => {
+    const outputs = [];
+    const writes = [];
+    const currentEmbedUrl = 'https://www.instagram.com/reel/DZhHOf4IwdH/embed/';
+    const currentSource = `
+      instagramReelEmbedUrl: getTrustedExternalUrl(
+        '${currentEmbedUrl}',
+      ),
+    `;
+
+    const result = await runInstagramReelUpdate({
+      readFileImpl: async () => currentSource,
+      targetFiles: ['/tmp/src/lib/site-content.ts', '/tmp/tests/smoke.spec.ts'],
+      fetchProfileImpl: async () => {
+        throw new InstagramRateLimitError(
+          'Instagram profile request failed with 429 Too Many Requests.',
+        );
+      },
+      writeFileImpl: async (filePath, source) => {
+        writes.push({ filePath, source });
+      },
+      writeGithubOutputImpl: async (values) => {
+        outputs.push(values);
+      },
+    });
+
+    assert.deepEqual(result, {
+      blocked: true,
+      blockerReason: 'instagram_rate_limited',
+      changed: false,
+      oldUrl: currentEmbedUrl,
+    });
+    assert.equal(writes.length, 0);
+    assert.deepEqual(outputs, [
+      {
+        blocked: 'true',
+        blocker_reason: 'instagram_rate_limited',
+        changed: 'false',
+        latest_shortcode: '',
+        new_url: '',
+        old_url: currentEmbedUrl,
+      },
+    ]);
   });
 });

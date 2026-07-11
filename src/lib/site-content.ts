@@ -190,7 +190,7 @@ export const integrationSettings = {
     process.env.NEXT_PUBLIC_REVIEWS_WIDGET_ID ??
     '5c9dd34d-87e7-4dbe-828b-63797bbbfcbb',
   instagramReelEmbedUrl: getTrustedExternalUrl(
-    'https://www.instagram.com/reel/DaXKF1Ts3dX/embed/',
+    'https://www.instagram.com/reel/DapMRq1MKlh/embed/',
     {
       allowedHostnames: trustedHostnames.instagramEmbed,
     },
