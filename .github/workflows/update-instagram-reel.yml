@@ -44,8 +44,14 @@ jobs:
         id: reel
         run: node scripts/update-instagram-reel.mjs
 
+      - name: Stop if Instagram lookup is blocked
+        if: steps.reel.outputs.blocked == 'true'
+        run: |
+          echo "Instagram reel lookup blocked: ${{ steps.reel.outputs.blocker_reason }}"
+          echo "Homepage reel was left unchanged."
+
       - name: Stop if reel is already current
-        if: steps.reel.outputs.changed != 'true'
+        if: steps.reel.outputs.blocked != 'true' && steps.reel.outputs.changed != 'true'
         run: echo "Homepage Instagram reel is already current."
 
       - name: Run lint
