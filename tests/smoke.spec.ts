@@ -23,8 +23,8 @@ import {
 } from '../src/lib/open-status';
 
 const routes = [...siteRoutes];
-const removedGigTickerMessage =
-  'Join us in the shop on 4th July @ 1400hrs for live music from the fantastic Santù, performing an intimate in-store acoustic set, perfect for a relaxed afternoon of browsing and listening';
+const shopClosureTickerMessage =
+  'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS';
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -155,7 +155,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header keeps the shop notice bar without the event ticker text', async ({
+  test('header shows the shop closure notice in the ticker', async ({
     page,
   }) => {
     await page.goto('/');
@@ -163,10 +163,13 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
+    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(ticker.getByText(removedGigTickerMessage)).toHaveCount(0);
+    await expect(
+      visibleTickerText.getByText(shopClosureTickerMessage).first(),
+    ).toBeVisible();
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -184,13 +187,15 @@ test.describe('public routes', () => {
     expect(
       shouldShowGigTicker({
         enabledMode: 'hidden',
+        events: gigTickerContent.events,
       }),
     ).toBe(false);
     expect(
       shouldShowGigTicker({
         enabledMode: 'enabled',
+        events: [],
       }),
-    ).toBe(true);
+    ).toBe(false);
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
@@ -611,7 +616,7 @@ test.describe('public routes', () => {
 
   test('home instagram reel uses the latest requested reel', () => {
     expect(integrationSettings.instagramReelEmbedUrl).toBe(
-      'https://www.instagram.com/reel/DaXKF1Ts3dX/embed/',
+      'https://www.instagram.com/reel/Da7MAwpMwwz/embed/',
     );
   });
 

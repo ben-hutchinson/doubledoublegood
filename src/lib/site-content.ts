@@ -35,8 +35,13 @@ export type HeaderOpenStatusBadgeMode = 'schedule' | 'closed';
 
 export type GigTickerEnabledMode = 'enabled' | 'hidden';
 
+export type GigTickerEvent = {
+  message: string;
+};
+
 type GigTickerVisibilityConfig = {
   enabledMode: GigTickerEnabledMode;
+  events: readonly GigTickerEvent[];
 };
 
 export function getHeaderOpenStatusBadgeMode(
@@ -51,8 +56,11 @@ export function getGigTickerEnabledMode(
   return value?.toLowerCase() === 'false' ? 'hidden' : 'enabled';
 }
 
-export function shouldShowGigTicker({ enabledMode }: GigTickerVisibilityConfig) {
-  return enabledMode === 'enabled';
+export function shouldShowGigTicker({
+  enabledMode,
+  events,
+}: GigTickerVisibilityConfig) {
+  return enabledMode === 'enabled' && events.length > 0;
 }
 
 export const bannedMockupValues = [
@@ -116,6 +124,12 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
+  events: [
+    {
+      message:
+        'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS',
+    },
+  ] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -190,7 +204,7 @@ export const integrationSettings = {
     process.env.NEXT_PUBLIC_REVIEWS_WIDGET_ID ??
     '5c9dd34d-87e7-4dbe-828b-63797bbbfcbb',
   instagramReelEmbedUrl: getTrustedExternalUrl(
-    'https://www.instagram.com/reel/DaXKF1Ts3dX/embed/',
+    'https://www.instagram.com/reel/Da7MAwpMwwz/embed/',
     {
       allowedHostnames: trustedHostnames.instagramEmbed,
     },
