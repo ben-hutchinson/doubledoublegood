@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 import { ImageCarousel } from '@/components/image-carousel';
 import {
   homePurchaseFeature,
@@ -37,14 +35,15 @@ export function PurchaseLink({ offer }: PurchaseLinkProps) {
   );
 }
 
-function PurchaseOverlay() {
+function PurchaseActions() {
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-stone-950 via-stone-950/90 to-transparent px-3 pt-12 pb-3 sm:px-4 sm:pt-16 sm:pb-4">
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
-        {homePurchaseFeature.offers.map((offer) => (
-          <PurchaseLink key={offer.label} offer={offer} />
-        ))}
-      </div>
+    <div
+      className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3"
+      data-purchase-actions
+    >
+      {homePurchaseFeature.offers.map((offer) => (
+        <PurchaseLink key={offer.label} offer={offer} />
+      ))}
     </div>
   );
 }
@@ -57,36 +56,24 @@ export function HomePurchaseFeature() {
     >
       <ImageCarousel
         ariaLabel={homePurchaseFeature.ariaLabel}
-        className="min-h-[38rem] flex-1 sm:min-h-[48rem] xl:min-h-0"
-        contentClassName="h-full"
-        imageClassName="h-[38rem] sm:h-[48rem] xl:h-full xl:min-h-[48rem]"
-        imageElementClassName="pb-20 sm:pb-24"
+        className="xl:flex-1"
+        contentClassName="space-y-3 xl:flex xl:h-full xl:flex-col"
+        footer={<PurchaseActions />}
+        imageClassName="h-[38rem] sm:h-[48rem] xl:h-auto xl:min-h-[48rem] xl:flex-1"
         imageFit="contain"
         imageSizes="(min-width: 1280px) 44vw, 100vw"
         items={homePurchaseFeature.slides}
-        overlay={<PurchaseOverlay />}
         preloadAllImages
         rotationIntervalMs={homePurchaseFeature.rotationIntervalMs}
+        showBottomScrim={false}
         showCounter={false}
-        showPlaybackControl
         showTopBorder={false}
         zoomOnHover={false}
       />
 
-      <div className="space-y-2 text-sm leading-6 text-stone-700">
-        <p>{homePurchaseFeature.note}</p>
-        <p className="flex flex-wrap gap-x-4 gap-y-2">
-          {homePurchaseFeature.policyLinks.map((item) => (
-            <Link
-              className="link-sweep font-semibold"
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </p>
-      </div>
+      <p className="text-sm leading-6 text-stone-700">
+        {homePurchaseFeature.note}
+      </p>
     </aside>
   );
 }

@@ -244,16 +244,24 @@ test.describe('public routes', () => {
   }) => {
     await page.goto('/');
 
+    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
     const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
     const images = carousel.locator('img');
+    const media = carousel.locator('[data-carousel-media]');
 
     await expect(images).toHaveCount(2);
     await expect(images.first()).toHaveAttribute('aria-hidden', 'false');
     await expect(images.nth(1)).toHaveAttribute('aria-hidden', 'true');
     await expect(images.nth(1)).toHaveAttribute('loading', 'eager');
     await expect(images.first()).toHaveCSS('object-fit', 'contain');
+    await expect(images.first()).toHaveCSS('padding-bottom', '0px');
     await expect(images.first()).toHaveCSS('transition-duration', '0.7s');
     await expect(carousel.locator('.media-zoom')).toHaveCount(0);
+    await expect(carousel.getByRole('button')).toHaveCount(0);
+    await expect(media.locator(':scope > div')).toHaveCount(0);
+    await expect(
+      carousel.locator('[data-carousel-media] + [data-purchase-actions]'),
+    ).toBeVisible();
     await expect(
       carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
     ).toHaveAttribute('href', stripePaymentLinkFixtures.lp);
@@ -263,11 +271,54 @@ test.describe('public routes', () => {
     await expect(carousel.locator('a[target]')).toHaveCount(0);
     await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'Delivery & Returns' }).last(),
-    ).toBeVisible();
+      purchaseFeature.getByRole('link', { name: 'Delivery & Returns' }),
+    ).toHaveCount(0);
     await expect(
-      page.getByRole('link', { name: 'Privacy' }).last(),
-    ).toBeVisible();
+      purchaseFeature.getByRole('link', { name: 'Privacy' }),
+    ).toHaveCount(0);
+  });
+
+  test('home purchase buttons sit below the panel in two desktop columns', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== 'chromium',
+      'Desktop layout coverage only.',
+    );
+    await page.goto('/');
+
+    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
+    const featureBox = await purchaseFeature.boundingBox();
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const panelBox = await carousel
+      .locator('[data-carousel-media]')
+      .boundingBox();
+    const ctaBoxes = await carousel
+      .locator('[data-purchase-actions]')
+      .getByRole('link')
+      .evaluateAll((links) =>
+        links.map((link) => link.getBoundingClientRect().toJSON()),
+      );
+    const noteBox = await purchaseFeature
+      .getByText(homePurchaseFeature.note)
+      .boundingBox();
+
+    expect(ctaBoxes).toHaveLength(2);
+    expect(ctaBoxes[0]?.top).toBe(ctaBoxes[1]?.top);
+    expect(ctaBoxes[0]?.top).toBeGreaterThanOrEqual(
+      (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
+    );
+    expect(noteBox?.y).toBeGreaterThanOrEqual(ctaBoxes[0]?.bottom ?? 0);
+    expect((noteBox?.y ?? 0) - (ctaBoxes[0]?.bottom ?? 0)).toBeLessThanOrEqual(
+      24,
+    );
+    expect(
+      Math.abs(
+        (featureBox?.y ?? 0) +
+          (featureBox?.height ?? 0) -
+          ((noteBox?.y ?? 0) + (noteBox?.height ?? 0)),
+      ),
+    ).toBeLessThanOrEqual(1);
   });
 
   test('home purchase carousel rotates after five seconds without moving its panel', async ({
@@ -303,7 +354,7 @@ test.describe('public routes', () => {
     expect(rotatedBox?.width).toBe(initialBox?.width);
   });
 
-  test('home purchase carousel pauses on hover, CTA focus, and explicit pause', async ({
+  test('home purchase carousel pauses on hover and CTA focus', async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -314,31 +365,31 @@ test.describe('public routes', () => {
     await page.goto('/');
 
     const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const secondImage = carousel.locator('img').nth(1);
+    const getActiveImageIndex = () =>
+      carousel
+        .locator('img')
+        .evaluateAll((images) =>
+          images.findIndex(
+            (image) => image.getAttribute('aria-hidden') === 'false',
+          ),
+        );
     const lpLink = carousel.getByRole('link', {
       name: 'BUY THE LP',
       exact: true,
     });
 
+    const activeImageIndex = await getActiveImageIndex();
+    expect(activeImageIndex).toBeGreaterThanOrEqual(0);
+
     await carousel.hover();
     await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
-    await expect(secondImage).toHaveAttribute('aria-hidden', 'true');
+    await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
 
     await lpLink.focus();
     await page.mouse.move(1, 1);
     await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
-    await expect(secondImage).toHaveAttribute('aria-hidden', 'true');
-
-    await page.keyboard.press('Tab');
-    const pauseButton = carousel.getByRole('button', {
-      name: 'Pause carousel',
-    });
-    await pauseButton.click();
-    await expect(
-      carousel.getByRole('button', { name: 'Play carousel' }),
-    ).toBeVisible();
-    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
-    await expect(secondImage).toHaveAttribute('aria-hidden', 'true');
+    await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
+    await expect(carousel.getByRole('button')).toHaveCount(0);
   });
 
   test('home purchase carousel disables autoplay for reduced motion', async ({
@@ -370,11 +421,19 @@ test.describe('public routes', () => {
     await page.goto('/');
 
     const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
+    const panelBox = await carousel
+      .locator('[data-carousel-media]')
+      .boundingBox();
     const ctaBoxes = await carousel
+      .locator('[data-purchase-actions]')
       .getByRole('link')
       .evaluateAll((links) =>
-        links.slice(0, 2).map((link) => link.getBoundingClientRect().toJSON()),
+        links.map((link) => link.getBoundingClientRect().toJSON()),
       );
+    const noteBox = await purchaseFeature
+      .getByText(homePurchaseFeature.note)
+      .boundingBox();
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
@@ -382,6 +441,14 @@ test.describe('public routes', () => {
     expect(ctaBoxes).toHaveLength(2);
     expect(ctaBoxes.every((box) => box.height >= 44 && box.width > 0)).toBe(
       true,
+    );
+    expect(ctaBoxes[0]?.top).toBeGreaterThanOrEqual(
+      (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
+    );
+    expect(ctaBoxes[1]?.top).toBeGreaterThanOrEqual(ctaBoxes[0]?.bottom ?? 0);
+    expect(noteBox?.y).toBeGreaterThanOrEqual(ctaBoxes[1]?.bottom ?? 0);
+    expect((noteBox?.y ?? 0) - (ctaBoxes[1]?.bottom ?? 0)).toBeLessThanOrEqual(
+      24,
     );
     await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
   });

@@ -12,6 +12,7 @@ type CarouselItem = {
 type ImageCarouselProps = {
   ariaLabel?: string;
   contentClassName?: string;
+  footer?: ReactNode;
   items: CarouselItem[];
   className?: string;
   imageClassName?: string;
@@ -21,6 +22,7 @@ type ImageCarouselProps = {
   overlay?: ReactNode;
   preloadAllImages?: boolean;
   rotationIntervalMs?: number;
+  showBottomScrim?: boolean;
   showCounter?: boolean;
   showPlaybackControl?: boolean;
   showTopBorder?: boolean;
@@ -30,6 +32,7 @@ type ImageCarouselProps = {
 export function ImageCarousel({
   ariaLabel = 'Shop image carousel',
   contentClassName = 'space-y-4',
+  footer,
   items,
   className,
   imageClassName,
@@ -39,6 +42,7 @@ export function ImageCarousel({
   overlay,
   preloadAllImages = false,
   rotationIntervalMs = 2600,
+  showBottomScrim = true,
   showCounter = true,
   showPlaybackControl = false,
   showTopBorder = true,
@@ -149,7 +153,9 @@ export function ImageCarousel({
               />
             );
           })}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
+          {showBottomScrim ? (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
+          ) : null}
           {overlay}
           {showPlaybackControl && hasMultipleItems ? (
             <button
@@ -164,6 +170,7 @@ export function ImageCarousel({
             </button>
           ) : null}
         </div>
+        {footer}
 
         {showCounter ? (
           <div className="flex flex-wrap items-center gap-3">
