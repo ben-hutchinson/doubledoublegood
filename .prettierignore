@@ -1,3 +1,5 @@
 .next/
 .playwright-mcp/
+.github/workflows/deploy-to-ionos.yaml
+.github/workflows/doubledoublegood-orchestration.yaml
 next-env.d.ts

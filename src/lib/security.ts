@@ -94,13 +94,37 @@ export function getTrustedStripePaymentLink(
     return '';
   }
 
-  const pathname = new URL(trustedUrl).pathname;
+  let pathname = new URL(trustedUrl).pathname;
 
-  if (pathname.startsWith('/test_') && !options.allowTestMode) {
+  try {
+    while (pathname.includes('%')) {
+      const decodedPathname = decodeURIComponent(pathname);
+
+      if (decodedPathname === pathname) {
+        break;
+      }
+
+      pathname = decodedPathname;
+    }
+  } catch {
+    return '';
+  }
+
+  if (pathname.toLowerCase().startsWith('/test_') && !options.allowTestMode) {
     return '';
   }
 
   return trustedUrl;
+}
+
+export function shouldAllowStripeTestPaymentLinks(
+  nodeEnvironment: string | undefined,
+  explicitAllowFlag: string | undefined,
+): boolean {
+  return (
+    nodeEnvironment !== 'production' ||
+    explicitAllowFlag?.trim().toLowerCase() === 'true'
+  );
 }
 
 export function safeJsonLdStringify(payload: unknown): string {

@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import {
   getTrustedExternalUrl,
   getTrustedStripePaymentLink,
+  shouldAllowStripeTestPaymentLinks,
   trustedHostnames,
 } from '../src/lib/security';
 
@@ -50,12 +51,30 @@ test.describe('security URL allowlist helpers', () => {
 
   test('rejects Stripe sandbox links unless test mode is explicitly allowed', () => {
     const sandboxPaymentLink = 'https://buy.stripe.com/test_7sIexample';
+    const encodedSandboxPaymentLink =
+      'https://buy.stripe.com/%74est_7sIexample';
 
     expect(getTrustedStripePaymentLink(sandboxPaymentLink)).toBe('');
+    expect(getTrustedStripePaymentLink(encodedSandboxPaymentLink)).toBe('');
     expect(
       getTrustedStripePaymentLink(sandboxPaymentLink, {
         allowTestMode: true,
       }),
     ).toBe(sandboxPaymentLink);
+  });
+
+  test('allows sandbox links only outside production or behind an explicit staging flag', () => {
+    expect(shouldAllowStripeTestPaymentLinks('development', undefined)).toBe(
+      true,
+    );
+    expect(shouldAllowStripeTestPaymentLinks('production', undefined)).toBe(
+      false,
+    );
+    expect(shouldAllowStripeTestPaymentLinks('production', 'false')).toBe(
+      false,
+    );
+    expect(shouldAllowStripeTestPaymentLinks('production', ' TRUE ')).toBe(
+      true,
+    );
   });
 });

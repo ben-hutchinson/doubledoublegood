@@ -6,6 +6,7 @@ This is the operating checklist for the two one-time Stripe Payment Links used b
 
 - The client owns the Stripe account, products, prices, stock allocation, refunds, and exported attendee list.
 - The two public GitHub repository variables are `NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK` and `NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK`. They must contain live `https://buy.stripe.com/...` links before production is built.
+- The IONOS workflow sets `ALLOW_STRIPE_TEST_PAYMENT_LINKS` only for non-default branches. This permits Stripe sandbox links on staging builds while the default production branch continues to reject them. Do not turn this into a repository variable or enable it for `main`.
 - Never put a Stripe secret or restricted key in GitHub repository variables, the repository, or any `NEXT_PUBLIC_*` value.
 - Do not merge this branch to `main` until the temporary Santù slide is replaced by final Getdown artwork, both live links pass purchase/refund checks, fulfilment and limits are confirmed, and the client approves the policy and event wording.
 

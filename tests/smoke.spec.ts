@@ -22,6 +22,7 @@ import {
   getOpenStatusMessage,
   parseWeeklyOpeningHours,
 } from '../src/lib/open-status';
+import { stripePaymentLinkFixtures } from './stripe-payment-link-fixtures';
 
 const routes = [...siteRoutes];
 const shopClosureTickerMessage =
@@ -255,10 +256,10 @@ test.describe('public routes', () => {
     await expect(carousel.locator('.media-zoom')).toHaveCount(0);
     await expect(
       carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
-    ).toHaveAttribute('href', 'https://buy.stripe.com/test_lp-example');
+    ).toHaveAttribute('href', stripePaymentLinkFixtures.lp);
     await expect(
       carousel.getByRole('link', { name: 'BUY THE LP + CD', exact: true }),
-    ).toHaveAttribute('href', 'https://buy.stripe.com/test_lp-cd-example');
+    ).toHaveAttribute('href', stripePaymentLinkFixtures.lpAndCd);
     await expect(carousel.locator('a[target]')).toHaveCount(0);
     await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
     await expect(

@@ -34,6 +34,7 @@ jobs:
 
       - name: Build Node assets
         env:
+          ALLOW_STRIPE_TEST_PAYMENT_LINKS: ${{ github.ref_name != github.event.repository.default_branch }}
           CI: true
           NEXT_PUBLIC_BEEHIIV_FORM_ID: 2c951e96-3dbb-4a70-adfb-bae21efd6b7b
           NEXT_PUBLIC_CONTACT_FORM_ENDPOINT: https://formspree.io/f/xqenwbzd

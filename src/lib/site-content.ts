@@ -2,6 +2,7 @@ import {
   getTrustedExternalUrl,
   getTrustedSiteUrl,
   getTrustedStripePaymentLink,
+  shouldAllowStripeTestPaymentLinks,
   trustedHostnames,
 } from '@/lib/security';
 
@@ -356,7 +357,10 @@ export const homeWhatWeDo = {
     "From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.",
 };
 
-const allowStripeTestMode = process.env.NODE_ENV !== 'production';
+const allowStripeTestMode = shouldAllowStripeTestPaymentLinks(
+  process.env.NODE_ENV,
+  process.env.ALLOW_STRIPE_TEST_PAYMENT_LINKS,
+);
 
 export const homePurchaseFeature: HomePurchaseFeature = {
   ariaLabel: 'Getdown Services purchase carousel',
