@@ -1,7 +1,7 @@
 # To better understand this file read this:
 # https://docs.ionos.space/docs/github-actions-customization/
 
-name: "Deploy Now: Execute Build"
+name: 'Deploy Now: Execute Build'
 
 on:
   workflow_call:
@@ -17,7 +17,7 @@ env:
   DEPLOYMENT_FOLDER: out
 
 jobs:
-# Please do not rename this job
+  # Please do not rename this job
   build-project:
     name: build doubledoublegood
     runs-on: ubuntu-latest
@@ -38,6 +38,8 @@ jobs:
           NEXT_PUBLIC_BEEHIIV_FORM_ID: 2c951e96-3dbb-4a70-adfb-bae21efd6b7b
           NEXT_PUBLIC_CONTACT_FORM_ENDPOINT: https://formspree.io/f/xqenwbzd
           NEXT_PUBLIC_SITE_URL: https://doubledoublegood.co.uk
+          NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK: ${{ vars.NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK }}
+          NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK: ${{ vars.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK }}
           SITE_URL: ${{ inputs.site-url }}
         run: |
           npm ci
@@ -45,7 +47,7 @@ jobs:
           npm test
           npm run build
 
-# Please do not touch the following action
+      # Please do not touch the following action
       - name: Store deployment content
         uses: ionos-deploy-now/artifact-action@v1
         with:

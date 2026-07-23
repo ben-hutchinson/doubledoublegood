@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-import { getTrustedExternalUrl, trustedHostnames } from '../src/lib/security';
+import {
+  getTrustedExternalUrl,
+  getTrustedStripePaymentLink,
+  trustedHostnames,
+} from '../src/lib/security';
 
 test.describe('security URL allowlist helpers', () => {
   test('rejects non-https URLs', () => {
@@ -26,5 +30,32 @@ test.describe('security URL allowlist helpers', () => {
         allowedHostnames: trustedHostnames.contactFormEndpoint,
       }),
     ).toBe('https://formspree.io/f/xqenwbzd');
+  });
+
+  test('accepts only exact HTTPS Stripe Payment Link hosts', () => {
+    const livePaymentLink = 'https://buy.stripe.com/14A6oH4example';
+
+    expect(getTrustedStripePaymentLink(livePaymentLink)).toBe(livePaymentLink);
+    expect(getTrustedStripePaymentLink('http://buy.stripe.com/unsafe')).toBe(
+      '',
+    );
+    expect(
+      getTrustedStripePaymentLink('https://buy.stripe.com.evil.test/unsafe'),
+    ).toBe('');
+    expect(
+      getTrustedStripePaymentLink('javascript:alert(document.domain)'),
+    ).toBe('');
+    expect(getTrustedStripePaymentLink(undefined)).toBe('');
+  });
+
+  test('rejects Stripe sandbox links unless test mode is explicitly allowed', () => {
+    const sandboxPaymentLink = 'https://buy.stripe.com/test_7sIexample';
+
+    expect(getTrustedStripePaymentLink(sandboxPaymentLink)).toBe('');
+    expect(
+      getTrustedStripePaymentLink(sandboxPaymentLink, {
+        allowTestMode: true,
+      }),
+    ).toBe(sandboxPaymentLink);
   });
 });

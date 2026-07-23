@@ -6,6 +6,7 @@ export const trustedHostnames = {
   mapEmbed: ['www.google.com'],
   reviewsEmbed: ['widget.elfsight.com', 'apps.elfsight.com', 'www.google.com'],
   reviewsScript: ['elfsightcdn.com'],
+  stripePaymentLink: ['buy.stripe.com'],
 } as const;
 
 type TrustedUrlOptions = {
@@ -75,6 +76,31 @@ export function getTrustedSiteUrl(
   fallbackUrl: string,
 ): string {
   return getTrustedExternalUrl(rawValue) || fallbackUrl;
+}
+
+type StripePaymentLinkOptions = {
+  allowTestMode?: boolean;
+};
+
+export function getTrustedStripePaymentLink(
+  rawValue: string | undefined,
+  options: StripePaymentLinkOptions = {},
+): string {
+  const trustedUrl = getTrustedExternalUrl(rawValue ?? '', {
+    allowedHostnames: trustedHostnames.stripePaymentLink,
+  });
+
+  if (!trustedUrl) {
+    return '';
+  }
+
+  const pathname = new URL(trustedUrl).pathname;
+
+  if (pathname.startsWith('/test_') && !options.allowTestMode) {
+    return '';
+  }
+
+  return trustedUrl;
 }
 
 export function safeJsonLdStringify(payload: unknown): string {

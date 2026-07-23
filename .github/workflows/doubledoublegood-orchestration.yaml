@@ -3,7 +3,7 @@
 # More information under https://docs.ionos.space/docs/github-actions-customization/
 # version: 2022-07-21
 
-name: "Deploy Now: Orchestration"
+name: 'Deploy Now: Orchestration'
 run-name: "Deploy Now: Build doubledoublegood · ${{ github.event.head_commit.message || format('Triggered by {0}', github.triggering_actor) }}"
 
 on:
@@ -26,7 +26,6 @@ jobs:
           service-host: api-eu.ionos.space
           project-id: 2eaa4a43-d2d8-4961-837e-c376abd5d9cf
           action: retrieve-info
-
 
   build:
     name: build

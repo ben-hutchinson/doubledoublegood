@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
+process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK ??=
+  'https://buy.stripe.com/test_lp-example';
+process.env.NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK ??=
+  'https://buy.stripe.com/test_lp-cd-example';
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
