@@ -239,7 +239,7 @@ test.describe('public routes', () => {
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
-  test('home purchase carousel shows two contained posters and persistent purchase choices', async ({
+  test('home purchase carousel shows two contained posters and one persistent LP purchase choice', async ({
     page,
   }) => {
     await page.goto('/');
@@ -259,15 +259,40 @@ test.describe('public routes', () => {
     await expect(carousel.locator('.media-zoom')).toHaveCount(0);
     await expect(carousel.getByRole('button')).toHaveCount(0);
     await expect(media.locator(':scope > div')).toHaveCount(0);
+    const purchaseCta = carousel.locator('[data-purchase-cta]');
+    const purchaseCtaChildren = purchaseCta.locator(':scope > *');
+
+    await expect(purchaseCta).toBeVisible();
     await expect(
-      carousel.locator('[data-carousel-media] + [data-purchase-actions]'),
+      carousel.locator('[data-purchase-cta] + [data-carousel-media]'),
     ).toBeVisible();
+    await expect(
+      purchaseCta.getByRole('heading', {
+        name: 'GETDOWN SERVICES INSTORE',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(purchaseCta.getByText(homePurchaseFeature.note)).toHaveText(
+      'Purchase the LP to receive free entry for one named person to the Getdown Services gig instore',
+    );
+    await expect(purchaseCtaChildren.nth(0)).toHaveRole('heading');
+    await expect(purchaseCtaChildren.nth(1)).toHaveText(
+      homePurchaseFeature.note,
+    );
+    await expect(purchaseCtaChildren.nth(2)).toHaveRole('link');
+    await expect(purchaseCtaChildren.nth(2)).toHaveText('BUY THE LP');
+    await expect(images.nth(1)).toHaveAttribute(
+      'src',
+      /getdown-services-album-art\.jpeg/,
+    );
+    await expect(images.nth(1)).toHaveAttribute(
+      'alt',
+      'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
+    );
     await expect(
       carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
     ).toHaveAttribute('href', stripePaymentLinkFixtures.lp);
-    await expect(
-      carousel.getByRole('link', { name: 'BUY THE LP + CD', exact: true }),
-    ).toHaveAttribute('href', stripePaymentLinkFixtures.lpAndCd);
+    await expect(carousel.getByRole('link')).toHaveCount(1);
     await expect(carousel.locator('a[target]')).toHaveCount(0);
     await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
     await expect(
@@ -278,7 +303,7 @@ test.describe('public routes', () => {
     ).toHaveCount(0);
   });
 
-  test('home purchase buttons sit below the panel in two desktop columns', async ({
+  test('home purchase note and full-width LP button sit above the desktop panel', async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -293,30 +318,24 @@ test.describe('public routes', () => {
     const panelBox = await carousel
       .locator('[data-carousel-media]')
       .boundingBox();
-    const ctaBoxes = await carousel
-      .locator('[data-purchase-actions]')
-      .getByRole('link')
-      .evaluateAll((links) =>
-        links.map((link) => link.getBoundingClientRect().toJSON()),
-      );
+    const ctaBox = await carousel
+      .getByRole('link', { name: 'BUY THE LP', exact: true })
+      .boundingBox();
     const noteBox = await purchaseFeature
       .getByText(homePurchaseFeature.note)
       .boundingBox();
 
-    expect(ctaBoxes).toHaveLength(2);
-    expect(ctaBoxes[0]?.top).toBe(ctaBoxes[1]?.top);
-    expect(ctaBoxes[0]?.top).toBeGreaterThanOrEqual(
-      (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
+    expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
+    expect(noteBox?.y).toBeLessThan(ctaBox?.y ?? 0);
+    expect(ctaBox?.y).toBeGreaterThanOrEqual(
+      (noteBox?.y ?? 0) + (noteBox?.height ?? 0),
     );
-    expect(noteBox?.y).toBeGreaterThanOrEqual(ctaBoxes[0]?.bottom ?? 0);
-    expect((noteBox?.y ?? 0) - (ctaBoxes[0]?.bottom ?? 0)).toBeLessThanOrEqual(
-      24,
-    );
+    expect(panelBox?.y ?? 0).toBeGreaterThanOrEqual(ctaBox?.y ?? 0);
     expect(
       Math.abs(
         (featureBox?.y ?? 0) +
           (featureBox?.height ?? 0) -
-          ((noteBox?.y ?? 0) + (noteBox?.height ?? 0)),
+          ((panelBox?.y ?? 0) + (panelBox?.height ?? 0)),
       ),
     ).toBeLessThanOrEqual(1);
   });
@@ -425,12 +444,9 @@ test.describe('public routes', () => {
     const panelBox = await carousel
       .locator('[data-carousel-media]')
       .boundingBox();
-    const ctaBoxes = await carousel
-      .locator('[data-purchase-actions]')
-      .getByRole('link')
-      .evaluateAll((links) =>
-        links.map((link) => link.getBoundingClientRect().toJSON()),
-      );
+    const ctaBox = await carousel
+      .getByRole('link', { name: 'BUY THE LP', exact: true })
+      .boundingBox();
     const noteBox = await purchaseFeature
       .getByText(homePurchaseFeature.note)
       .boundingBox();
@@ -438,17 +454,14 @@ test.describe('public routes', () => {
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(412);
-    expect(ctaBoxes).toHaveLength(2);
-    expect(ctaBoxes.every((box) => box.height >= 44 && box.width > 0)).toBe(
-      true,
+    expect(ctaBox?.height).toBeGreaterThanOrEqual(44);
+    expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
+    expect(noteBox?.y).toBeLessThan(ctaBox?.y ?? 0);
+    expect(ctaBox?.y).toBeGreaterThanOrEqual(
+      (noteBox?.y ?? 0) + (noteBox?.height ?? 0),
     );
-    expect(ctaBoxes[0]?.top).toBeGreaterThanOrEqual(
-      (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
-    );
-    expect(ctaBoxes[1]?.top).toBeGreaterThanOrEqual(ctaBoxes[0]?.bottom ?? 0);
-    expect(noteBox?.y).toBeGreaterThanOrEqual(ctaBoxes[1]?.bottom ?? 0);
-    expect((noteBox?.y ?? 0) - (ctaBoxes[1]?.bottom ?? 0)).toBeLessThanOrEqual(
-      24,
+    expect(panelBox?.y).toBeGreaterThanOrEqual(
+      (ctaBox?.y ?? 0) + (ctaBox?.height ?? 0),
     );
     await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
   });

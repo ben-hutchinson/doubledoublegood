@@ -36,9 +36,9 @@ export type HomePurchaseOffer = {
 
 type HomePurchaseFeature = {
   ariaLabel: string;
+  heading: string;
   note: string;
-  offers: HomePurchaseOffer[];
-  policyLinks: NavigationItem[];
+  offer: HomePurchaseOffer;
   rotationIntervalMs: number;
   slides: CarouselImage[];
 };
@@ -364,27 +364,15 @@ const allowStripeTestMode = shouldAllowStripeTestPaymentLinks(
 
 export const homePurchaseFeature: HomePurchaseFeature = {
   ariaLabel: 'Getdown Services purchase carousel',
-  note: 'Purchase either option to receive free entry for one named person to the Getdown Services gig at the Double Double Good Music Emporium.',
-  offers: [
-    {
-      href: getTrustedStripePaymentLink(
-        process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK,
-        { allowTestMode: allowStripeTestMode },
-      ),
-      label: 'BUY THE LP',
-    },
-    {
-      href: getTrustedStripePaymentLink(
-        process.env.NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK,
-        { allowTestMode: allowStripeTestMode },
-      ),
-      label: 'BUY THE LP + CD',
-    },
-  ],
-  policyLinks: [
-    { href: '/delivery-returns', label: 'Delivery & Returns' },
-    { href: '/privacy', label: 'Privacy' },
-  ],
+  heading: 'GETDOWN SERVICES INSTORE',
+  note: 'Purchase the LP to receive free entry for one named person to the Getdown Services gig instore',
+  offer: {
+    href: getTrustedStripePaymentLink(
+      process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK,
+      { allowTestMode: allowStripeTestMode },
+    ),
+    label: 'BUY THE LP',
+  },
   rotationIntervalMs: 5000,
   slides: [
     {
@@ -392,8 +380,8 @@ export const homePurchaseFeature: HomePurchaseFeature = {
       src: '/assets/home/getdown-tour-pic.jpg',
     },
     {
-      alt: 'Santù in-store gig poster at Double Double Good, used as temporary staging artwork',
-      src: '/assets/home/santu-colour.jpg',
+      alt: 'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
+      src: '/assets/home/getdown-services-album-art.jpeg',
     },
   ],
 };

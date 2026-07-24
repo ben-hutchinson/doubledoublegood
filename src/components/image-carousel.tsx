@@ -12,7 +12,7 @@ type CarouselItem = {
 type ImageCarouselProps = {
   ariaLabel?: string;
   contentClassName?: string;
-  footer?: ReactNode;
+  header?: ReactNode;
   items: CarouselItem[];
   className?: string;
   imageClassName?: string;
@@ -32,7 +32,7 @@ type ImageCarouselProps = {
 export function ImageCarousel({
   ariaLabel = 'Shop image carousel',
   contentClassName = 'space-y-4',
-  footer,
+  header,
   items,
   className,
   imageClassName,
@@ -127,6 +127,7 @@ export function ImageCarousel({
       onMouseLeave={() => setIsHoverPaused(false)}
     >
       <div className={contentClassName}>
+        {header}
         <div className={imageShellClassName} data-carousel-media>
           {items.map((item, itemIndex) => {
             const isActive = itemIndex === safeIndex;
@@ -170,8 +171,6 @@ export function ImageCarousel({
             </button>
           ) : null}
         </div>
-        {footer}
-
         {showCounter ? (
           <div className="flex flex-wrap items-center gap-3">
             <p

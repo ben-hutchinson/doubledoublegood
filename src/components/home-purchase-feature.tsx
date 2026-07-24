@@ -35,15 +35,16 @@ export function PurchaseLink({ offer }: PurchaseLinkProps) {
   );
 }
 
-function PurchaseActions() {
+function PurchaseCallToAction() {
   return (
-    <div
-      className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3"
-      data-purchase-actions
-    >
-      {homePurchaseFeature.offers.map((offer) => (
-        <PurchaseLink key={offer.label} offer={offer} />
-      ))}
+    <div className="space-y-3" data-purchase-cta>
+      <h2 className="heading-section text-2xl font-black text-stone-950 uppercase">
+        {homePurchaseFeature.heading}
+      </h2>
+      <p className="text-sm leading-6 text-stone-700">
+        {homePurchaseFeature.note}
+      </p>
+      <PurchaseLink offer={homePurchaseFeature.offer} />
     </div>
   );
 }
@@ -57,8 +58,8 @@ export function HomePurchaseFeature() {
       <ImageCarousel
         ariaLabel={homePurchaseFeature.ariaLabel}
         className="xl:flex-1"
-        contentClassName="space-y-3 xl:flex xl:h-full xl:flex-col"
-        footer={<PurchaseActions />}
+        contentClassName="space-y-4 xl:flex xl:h-full xl:flex-col"
+        header={<PurchaseCallToAction />}
         imageClassName="h-[38rem] sm:h-[48rem] xl:h-auto xl:min-h-[48rem] xl:flex-1"
         imageFit="contain"
         imageSizes="(min-width: 1280px) 44vw, 100vw"
@@ -70,10 +71,6 @@ export function HomePurchaseFeature() {
         showTopBorder={false}
         zoomOnHover={false}
       />
-
-      <p className="text-sm leading-6 text-stone-700">
-        {homePurchaseFeature.note}
-      </p>
     </aside>
   );
 }

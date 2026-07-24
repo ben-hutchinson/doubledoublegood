@@ -39,7 +39,6 @@ jobs:
           NEXT_PUBLIC_BEEHIIV_FORM_ID: 2c951e96-3dbb-4a70-adfb-bae21efd6b7b
           NEXT_PUBLIC_CONTACT_FORM_ENDPOINT: https://formspree.io/f/xqenwbzd
           NEXT_PUBLIC_SITE_URL: https://doubledoublegood.co.uk
-          NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK: ${{ vars.NEXT_PUBLIC_STRIPE_LP_CD_PAYMENT_LINK }}
           NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK: ${{ vars.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK }}
           SITE_URL: ${{ inputs.site-url }}
         run: |
