@@ -27,6 +27,11 @@ import { stripePaymentLinkFixtures } from './stripe-payment-link-fixtures';
 const routes = [...siteRoutes];
 const shopClosureTickerMessage =
   'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS';
+const getdownDescription = [
+  "Join us as we celebrate the release of 'Massive Champion', the brand-new album from Getdown Services.",
+  "The band will be visiting the shop for a special appearance to mark the launch and we're really looking forward to welcoming them.",
+  'Entry is free so long as you purchase the LP below.',
+] as const;
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -268,19 +273,19 @@ test.describe('public routes', () => {
     ).toBeVisible();
     await expect(
       purchaseCta.getByRole('heading', {
-        name: 'GETDOWN SERVICES INSTORE',
+        name: 'GETDOWN SERVICES IN-STORE',
         exact: true,
       }),
     ).toBeVisible();
-    await expect(purchaseCta.getByText(homePurchaseFeature.note)).toHaveText(
-      'Purchase the LP to receive free entry for one named person to the Getdown Services gig instore',
+    await expect(purchaseCta.locator(':scope > p')).toHaveText(
+      getdownDescription,
     );
     await expect(purchaseCtaChildren.nth(0)).toHaveRole('heading');
-    await expect(purchaseCtaChildren.nth(1)).toHaveText(
-      homePurchaseFeature.note,
-    );
-    await expect(purchaseCtaChildren.nth(2)).toHaveRole('link');
-    await expect(purchaseCtaChildren.nth(2)).toHaveText('BUY THE LP');
+    await expect(purchaseCtaChildren.nth(1)).toHaveText(getdownDescription[0]);
+    await expect(purchaseCtaChildren.nth(2)).toHaveText(getdownDescription[1]);
+    await expect(purchaseCtaChildren.nth(3)).toHaveText(getdownDescription[2]);
+    await expect(purchaseCtaChildren.nth(4)).toHaveRole('link');
+    await expect(purchaseCtaChildren.nth(4)).toHaveText('BUY THE LP');
     await expect(images.nth(1)).toHaveAttribute(
       'src',
       /getdown-services-album-art\.jpeg/,
@@ -294,7 +299,7 @@ test.describe('public routes', () => {
     ).toHaveAttribute('href', stripePaymentLinkFixtures.lp);
     await expect(carousel.getByRole('link')).toHaveCount(1);
     await expect(carousel.locator('a[target]')).toHaveCount(0);
-    await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
+    await expect(page.getByText(getdownDescription[2])).toBeVisible();
     await expect(
       purchaseFeature.getByRole('link', { name: 'Delivery & Returns' }),
     ).toHaveCount(0);
@@ -322,7 +327,7 @@ test.describe('public routes', () => {
       .getByRole('link', { name: 'BUY THE LP', exact: true })
       .boundingBox();
     const noteBox = await purchaseFeature
-      .getByText(homePurchaseFeature.note)
+      .getByText(getdownDescription[2])
       .boundingBox();
 
     expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
@@ -448,7 +453,7 @@ test.describe('public routes', () => {
       .getByRole('link', { name: 'BUY THE LP', exact: true })
       .boundingBox();
     const noteBox = await purchaseFeature
-      .getByText(homePurchaseFeature.note)
+      .getByText(getdownDescription[2])
       .boundingBox();
 
     expect(
@@ -463,7 +468,7 @@ test.describe('public routes', () => {
     expect(panelBox?.y).toBeGreaterThanOrEqual(
       (ctaBox?.y ?? 0) + (ctaBox?.height ?? 0),
     );
-    await expect(page.getByText(homePurchaseFeature.note)).toBeVisible();
+    await expect(page.getByText(getdownDescription[2])).toBeVisible();
   });
 
   test('open status automation only shows open during opening hours', () => {

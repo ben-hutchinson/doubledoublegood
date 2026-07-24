@@ -36,8 +36,8 @@ export type HomePurchaseOffer = {
 
 type HomePurchaseFeature = {
   ariaLabel: string;
+  description: string[];
   heading: string;
-  note: string;
   offer: HomePurchaseOffer;
   rotationIntervalMs: number;
   slides: CarouselImage[];
@@ -364,8 +364,12 @@ const allowStripeTestMode = shouldAllowStripeTestPaymentLinks(
 
 export const homePurchaseFeature: HomePurchaseFeature = {
   ariaLabel: 'Getdown Services purchase carousel',
-  heading: 'GETDOWN SERVICES INSTORE',
-  note: 'Purchase the LP to receive free entry for one named person to the Getdown Services gig instore',
+  description: [
+    "Join us as we celebrate the release of 'Massive Champion', the brand-new album from Getdown Services.",
+    "The band will be visiting the shop for a special appearance to mark the launch and we're really looking forward to welcoming them.",
+    'Entry is free so long as you purchase the LP below.',
+  ],
+  heading: 'GETDOWN SERVICES IN-STORE',
   offer: {
     href: getTrustedStripePaymentLink(
       process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK,

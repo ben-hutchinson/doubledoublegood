@@ -41,9 +41,11 @@ function PurchaseCallToAction() {
       <h2 className="heading-section text-2xl font-black text-stone-950 uppercase">
         {homePurchaseFeature.heading}
       </h2>
-      <p className="text-sm leading-6 text-stone-700">
-        {homePurchaseFeature.note}
-      </p>
+      {homePurchaseFeature.description.map((paragraph) => (
+        <p className="text-sm leading-6 text-stone-700" key={paragraph}>
+          {paragraph}
+        </p>
+      ))}
       <PurchaseLink offer={homePurchaseFeature.offer} />
     </div>
   );
