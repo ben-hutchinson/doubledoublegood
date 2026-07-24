@@ -1,6 +1,8 @@
 import {
   getTrustedExternalUrl,
   getTrustedSiteUrl,
+  getTrustedStripePaymentLink,
+  shouldAllowStripeTestPaymentLinks,
   trustedHostnames,
 } from '@/lib/security';
 
@@ -23,7 +25,22 @@ export type CarouselImage = {
 
 export type PolicySection = {
   heading: string;
+  links?: NavigationItem[];
   paragraphs: string[];
+};
+
+export type HomePurchaseOffer = {
+  href: string;
+  label: string;
+};
+
+type HomePurchaseFeature = {
+  ariaLabel: string;
+  description: string[];
+  heading: string;
+  offer: HomePurchaseOffer;
+  rotationIntervalMs: number;
+  slides: CarouselImage[];
 };
 
 export type CommunityContent = {
@@ -338,13 +355,39 @@ export const homeWhatWeDo = {
     "We're always looking to buy records too. Whether you've got a small selection or a full collection, we offer fair prices and a straightforward, honest approach.",
   closing:
     "From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.",
-  shopfrontImage: {
-    alt: 'The Double Double Good shopfront at the Ancient High House',
-    height: 1600,
-    objectPosition: '50% 46%',
-    src: '/shopfront.jpg',
-    width: 1200,
+};
+
+const allowStripeTestMode = shouldAllowStripeTestPaymentLinks(
+  process.env.NODE_ENV,
+  process.env.ALLOW_STRIPE_TEST_PAYMENT_LINKS,
+);
+
+export const homePurchaseFeature: HomePurchaseFeature = {
+  ariaLabel: 'Getdown Services purchase carousel',
+  description: [
+    "Join us as we celebrate the release of 'Massive Champion', the brand-new album from Getdown Services.",
+    "The band will be visiting the shop for a special appearance to mark the launch and we're really looking forward to welcoming them.",
+    'Entry is free so long as you purchase the LP below.',
+  ],
+  heading: 'GETDOWN SERVICES IN-STORE',
+  offer: {
+    href: getTrustedStripePaymentLink(
+      process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK,
+      { allowTestMode: allowStripeTestMode },
+    ),
+    label: 'BUY THE LP',
   },
+  rotationIntervalMs: 5000,
+  slides: [
+    {
+      alt: 'Getdown Services Massive Champion in-store tour poster, including the Stafford show at Double Double Good on 19 August',
+      src: '/assets/home/getdown-tour-pic.jpg',
+    },
+    {
+      alt: 'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
+      src: '/assets/home/getdown-services-album-art.jpeg',
+    },
+  ],
 };
 
 export const findUsContent = {
@@ -439,22 +482,44 @@ export const footerContent = {
 
 export const deliveryReturnsSections: PolicySection[] = [
   {
-    heading: 'Delivery',
+    heading: 'Prices and ordering',
     paragraphs: [
-      'If a delivery is arranged directly with the shop, postage options, costs, and timing will be confirmed with you before anything is sent.',
+      'The product price, any applicable tax, and the available fulfilment charges are shown at Stripe Checkout before you pay. Your order is accepted once Stripe confirms successful payment.',
     ],
   },
   {
-    heading: 'Returns',
+    heading: 'Collection and UK delivery',
     paragraphs: [
-      'If there is a problem with something you have bought, please contact the shop first by email, phone, or the contact form.',
-      'Include your name, what you bought, and the issue so the shop can talk you through the next step.',
+      'Choose “Collect from Double Double Good — free” or the fixed UK delivery option shown at Checkout. The delivery price and estimated timing are displayed before payment.',
+      'Please provide an accurate name, email address, and delivery address. We will use those details to fulfil the order or let you know when collection is ready.',
     ],
   },
   {
-    heading: 'Questions before you buy',
+    heading: 'Cancellation and returns',
     paragraphs: [
-      'If you need help with formats, condition, or availability, get in touch before you travel and the shop will do its best to help.',
+      'Unless a legal exception applies, you may tell us that you wish to cancel an online order for physical goods within 14 days of receiving them. After telling us, return the goods within the next 14 days.',
+      'You are normally responsible for the direct cost of returning unwanted goods. We will refund the price and the standard outbound delivery charge; an extra amount paid for premium delivery is not refundable. A refund may be reduced if the goods have been handled beyond what is reasonably necessary to inspect them.',
+      'Contact the shop before returning anything so we can confirm the return address and next steps. These terms do not limit your statutory rights.',
+    ],
+    links: [
+      {
+        href: 'https://www.gov.uk/online-and-distance-selling-for-businesses/distance-selling',
+        label: 'GOV.UK distance selling guidance',
+      },
+    ],
+  },
+  {
+    heading: 'Faults and refunds',
+    paragraphs: [
+      'If an item is faulty, damaged, or not as described, contact the shop promptly with your name, Stripe receipt or payment reference, and details of the problem. Your rights for faulty goods are separate from the change-of-mind cancellation period.',
+      'Approved refunds are returned through Stripe to the original payment method. Bank processing times can vary after the refund is issued.',
+    ],
+  },
+  {
+    heading: 'Free gig admission',
+    paragraphs: [
+      'The advertised gig admission is a free promotional benefit attached to a qualifying purchase. It admits one named purchaser who presents the successful, non-refunded Stripe receipt. Cancelling or refunding the order also cancels any unused admission.',
+      'If the gig is cancelled or rescheduled, contact the shop for the event arrangements. The physical-goods cancellation, returns, and fault rights above continue to apply.',
     ],
   },
 ];
@@ -465,6 +530,7 @@ export const privacySections: PolicySection[] = [
     paragraphs: [
       'If you use the contact form, the shop receives the name, email address, optional phone number, and message that you submit.',
       'If you use the mailing-list form, the shop receives the email address you provide for updates you have asked for.',
+      'When you buy through a Stripe Payment Link, transaction and fulfilment information can include your name, email address, billing or delivery address, product choice, fulfilment choice, payment status, payment reference, and receipt number.',
     ],
   },
   {
@@ -472,13 +538,33 @@ export const privacySections: PolicySection[] = [
     paragraphs: [
       'Contact-form details are used to reply to your enquiry and keep track of your message.',
       'Mailing-list details are used to send occasional shop updates and nothing more.',
+      'Purchase information is used to take payment, fulfil or arrange collection of your order, prepare the named gig-entry list, answer queries, issue refunds, keep financial records, and support fraud prevention.',
     ],
   },
   {
-    heading: 'Third-party services',
+    heading: 'Payments through Stripe',
+    paragraphs: [
+      'Stripe hosts the payment form and processes the payment information you enter. This website does not receive or store your full card details.',
+      'Stripe processes information under its own privacy terms. Review the Stripe Privacy Policy before paying if you want more detail about that processing.',
+    ],
+    links: [
+      {
+        href: 'https://stripe.com/gb/privacy',
+        label: 'Stripe Privacy Policy',
+      },
+    ],
+  },
+  {
+    heading: 'Other third-party services',
     paragraphs: [
       'Contact-form submissions are sent to Formspree (form provider) and include your name, email, optional phone number, and message.',
       'The site also loads third-party content from Beehiiv, Google Maps, Instagram, and review widgets. Those services may process technical information such as your IP address, browser details, and the page you visited in order to display their content.',
+    ],
+  },
+  {
+    heading: 'Retention and event records',
+    paragraphs: [
+      'Order records are kept only as long as needed for fulfilment, returns, accounting, fraud prevention, and legal obligations. The gig-entry working list should be securely deleted when it is no longer needed for the event or related queries.',
     ],
   },
   {
