@@ -7,14 +7,14 @@ import { privacySections } from '@/lib/site-content';
 
 export const metadata: Metadata = createPageMetadata(
   'Privacy Policy',
-  'How the site handles contact form and newsletter information for Double Double Good Music Emporium.',
+  'How Double Double Good Music Emporium handles contact, newsletter, order, payment, fulfilment, and event-entry information.',
   '/privacy',
 );
 
 export default function PrivacyPage() {
   return (
     <PageShell
-      intro="This policy covers the information collected through the contact and mailing-list forms on this site."
+      intro="This policy covers information used for enquiries, mailing-list updates, Stripe purchases, order fulfilment, and named event entry."
       title="Privacy Policy"
     >
       <div className="surface-stack grid gap-5">
@@ -23,6 +23,13 @@ export default function PrivacyPage() {
             <ContentCard title={section.heading}>
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
+              ))}
+              {section.links?.map((link) => (
+                <p key={link.href}>
+                  <a className="link-sweep font-semibold" href={link.href}>
+                    {link.label}
+                  </a>
+                </p>
               ))}
             </ContentCard>
           </section>

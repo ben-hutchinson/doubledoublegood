@@ -7,7 +7,7 @@ import { deliveryReturnsSections } from '@/lib/site-content';
 
 export const metadata: Metadata = createPageMetadata(
   'Delivery & Returns',
-  'Helpful delivery guidance and returns information for the V1 brochure site.',
+  'Prices, collection, UK delivery, cancellation, returns, faults, refunds, and promotional gig admission for online orders.',
   '/delivery-returns',
 );
 
@@ -20,6 +20,13 @@ export default function DeliveryReturnsPage() {
             <ContentCard title={section.heading}>
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
+              ))}
+              {section.links?.map((link) => (
+                <p key={link.href}>
+                  <a className="link-sweep font-semibold" href={link.href}>
+                    {link.label}
+                  </a>
+                </p>
               ))}
             </ContentCard>
           </section>

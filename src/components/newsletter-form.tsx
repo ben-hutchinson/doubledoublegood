@@ -17,7 +17,11 @@ export function NewsletterForm() {
   useEffect(() => {
     const embedShell = embedShellRef.current;
 
-    if (!embedShell || !trustedScriptUrl || !integrationSettings.beehiivFormId) {
+    if (
+      !embedShell ||
+      !trustedScriptUrl ||
+      !integrationSettings.beehiivFormId
+    ) {
       return;
     }
 

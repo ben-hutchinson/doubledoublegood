@@ -7,6 +7,7 @@ import {
   businessDetails,
   carouselItems,
   communityContent,
+  homePurchaseFeature,
   homeWhatWeDo,
   integrationSettings,
   getHeaderOpenStatusBadgeMode,
@@ -21,10 +22,16 @@ import {
   getOpenStatusMessage,
   parseWeeklyOpeningHours,
 } from '../src/lib/open-status';
+import { stripePaymentLinkFixtures } from './stripe-payment-link-fixtures';
 
 const routes = [...siteRoutes];
-const removedGigTickerMessage =
-  'Join us in the shop on 4th July @ 1400hrs for live music from the fantastic Santù, performing an intimate in-store acoustic set, perfect for a relaxed afternoon of browsing and listening';
+const shopClosureTickerMessage =
+  'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS';
+const getdownDescription = [
+  "Join us as we celebrate the release of 'Massive Champion', the brand-new album from Getdown Services.",
+  "The band will be visiting the shop for a special appearance to mark the launch and we're really looking forward to welcoming them.",
+  'Entry is free so long as you purchase the LP below.',
+] as const;
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -114,10 +121,10 @@ test.describe('public routes', () => {
     }
 
     await expect(
-      page.getByRole('link', { name: 'Delivery & Returns' }),
+      page.locator('footer').getByRole('link', { name: 'Delivery & Returns' }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'Privacy Policy' }),
+      page.locator('footer').getByRole('link', { name: 'Privacy Policy' }),
     ).toBeVisible();
   });
 
@@ -134,6 +141,44 @@ test.describe('public routes', () => {
         'This V1 website is informational and does not offer an online checkout.',
       ),
     ).toHaveCount(0);
+  });
+
+  test('delivery and returns explains online fulfilment, cancellation, and gig admission', async ({
+    page,
+  }) => {
+    await page.goto('/delivery-returns/');
+
+    await expect(
+      page.getByText(/Collect from Double Double Good.*free/i),
+    ).toBeVisible();
+    await expect(page.getByText(/within 14 days of receiving/i)).toBeVisible();
+    await expect(
+      page.getByText(/return.*within the next 14 days/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/gig.*cancelled or rescheduled/i),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'GOV.UK distance selling guidance' }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.gov.uk/online-and-distance-selling-for-businesses/distance-selling',
+    );
+  });
+
+  test('privacy page explains Stripe processing without claiming the site receives card details', async ({
+    page,
+  }) => {
+    await page.goto('/privacy/');
+
+    await expect(page.getByText(/transaction and fulfilment/i)).toBeVisible();
+    await expect(page.getByText(/fraud prevention/i).first()).toBeVisible();
+    await expect(
+      page.getByText(/does not receive or store your full card/i),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Stripe Privacy Policy' }),
+    ).toHaveAttribute('href', 'https://stripe.com/gb/privacy');
   });
 
   test('header shows the open status badge and footer keeps opening times simple', async ({
@@ -155,7 +200,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header keeps the shop notice bar without the event ticker text', async ({
+  test('header shows the shop closure notice in the ticker', async ({
     page,
   }) => {
     await page.goto('/');
@@ -163,10 +208,13 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
+    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(ticker.getByText(removedGigTickerMessage)).toHaveCount(0);
+    await expect(
+      visibleTickerText.getByText(shopClosureTickerMessage).first(),
+    ).toBeVisible();
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -184,23 +232,243 @@ test.describe('public routes', () => {
     expect(
       shouldShowGigTicker({
         enabledMode: 'hidden',
+        events: gigTickerContent.events,
       }),
     ).toBe(false);
     expect(
       shouldShowGigTicker({
         enabledMode: 'enabled',
+        events: [],
       }),
-    ).toBe(true);
+    ).toBe(false);
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
-  test('home feature image uses the large shopfront photo', () => {
-    expect(homeWhatWeDo.shopfrontImage).toMatchObject({
-      alt: 'The Double Double Good shopfront at the Ancient High House',
-      height: 1600,
-      src: '/shopfront.jpg',
-      width: 1200,
+  test('home purchase carousel shows two contained posters and one persistent LP purchase choice', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const images = carousel.locator('img');
+    const media = carousel.locator('[data-carousel-media]');
+
+    await expect(images).toHaveCount(2);
+    await expect(images.first()).toHaveAttribute('aria-hidden', 'false');
+    await expect(images.nth(1)).toHaveAttribute('aria-hidden', 'true');
+    await expect(images.nth(1)).toHaveAttribute('loading', 'eager');
+    await expect(images.first()).toHaveCSS('object-fit', 'contain');
+    await expect(images.first()).toHaveCSS('padding-bottom', '0px');
+    await expect(images.first()).toHaveCSS('transition-duration', '0.7s');
+    await expect(carousel.locator('.media-zoom')).toHaveCount(0);
+    await expect(carousel.getByRole('button')).toHaveCount(0);
+    await expect(media.locator(':scope > div')).toHaveCount(0);
+    const purchaseCta = carousel.locator('[data-purchase-cta]');
+    const purchaseCtaChildren = purchaseCta.locator(':scope > *');
+
+    await expect(purchaseCta).toBeVisible();
+    await expect(
+      carousel.locator('[data-purchase-cta] + [data-carousel-media]'),
+    ).toBeVisible();
+    await expect(
+      purchaseCta.getByRole('heading', {
+        name: 'GETDOWN SERVICES IN-STORE',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(purchaseCta.locator(':scope > p')).toHaveText(
+      getdownDescription,
+    );
+    await expect(purchaseCtaChildren.nth(0)).toHaveRole('heading');
+    await expect(purchaseCtaChildren.nth(1)).toHaveText(getdownDescription[0]);
+    await expect(purchaseCtaChildren.nth(2)).toHaveText(getdownDescription[1]);
+    await expect(purchaseCtaChildren.nth(3)).toHaveText(getdownDescription[2]);
+    await expect(purchaseCtaChildren.nth(4)).toHaveRole('link');
+    await expect(purchaseCtaChildren.nth(4)).toHaveText('BUY THE LP');
+    await expect(images.nth(1)).toHaveAttribute(
+      'src',
+      /getdown-services-album-art\.jpeg/,
+    );
+    await expect(images.nth(1)).toHaveAttribute(
+      'alt',
+      'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
+    );
+    await expect(
+      carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
+    ).toHaveAttribute('href', stripePaymentLinkFixtures.lp);
+    await expect(carousel.getByRole('link')).toHaveCount(1);
+    await expect(carousel.locator('a[target]')).toHaveCount(0);
+    await expect(page.getByText(getdownDescription[2])).toBeVisible();
+    await expect(
+      purchaseFeature.getByRole('link', { name: 'Delivery & Returns' }),
+    ).toHaveCount(0);
+    await expect(
+      purchaseFeature.getByRole('link', { name: 'Privacy' }),
+    ).toHaveCount(0);
+  });
+
+  test('home purchase note and full-width LP button sit above the desktop panel', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== 'chromium',
+      'Desktop layout coverage only.',
+    );
+    await page.goto('/');
+
+    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
+    const featureBox = await purchaseFeature.boundingBox();
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const panelBox = await carousel
+      .locator('[data-carousel-media]')
+      .boundingBox();
+    const ctaBox = await carousel
+      .getByRole('link', { name: 'BUY THE LP', exact: true })
+      .boundingBox();
+    const noteBox = await purchaseFeature
+      .getByText(getdownDescription[2])
+      .boundingBox();
+
+    expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
+    expect(noteBox?.y).toBeLessThan(ctaBox?.y ?? 0);
+    expect(ctaBox?.y).toBeGreaterThanOrEqual(
+      (noteBox?.y ?? 0) + (noteBox?.height ?? 0),
+    );
+    expect(panelBox?.y ?? 0).toBeGreaterThanOrEqual(ctaBox?.y ?? 0);
+    expect(
+      Math.abs(
+        (featureBox?.y ?? 0) +
+          (featureBox?.height ?? 0) -
+          ((panelBox?.y ?? 0) + (panelBox?.height ?? 0)),
+      ),
+    ).toBeLessThanOrEqual(1);
+  });
+
+  test('home purchase carousel rotates after five seconds without moving its panel', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== 'chromium',
+      'Desktop timing coverage is enough.',
+    );
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/');
+    await page.mouse.move(1, 1);
+
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const panel = carousel.locator('[data-carousel-media]');
+    const initialBox = await panel.boundingBox();
+
+    await expect(carousel.locator('img').nth(1)).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 250);
+    await expect(carousel.locator('img').nth(1)).toHaveAttribute(
+      'aria-hidden',
+      'false',
+    );
+    await expect(
+      carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
+    ).toBeVisible();
+
+    const rotatedBox = await panel.boundingBox();
+    expect(rotatedBox?.height).toBe(initialBox?.height);
+    expect(rotatedBox?.width).toBe(initialBox?.width);
+  });
+
+  test('home purchase carousel pauses on hover and CTA focus', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== 'chromium',
+      'Desktop pointer timing coverage is enough.',
+    );
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/');
+
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const getActiveImageIndex = () =>
+      carousel
+        .locator('img')
+        .evaluateAll((images) =>
+          images.findIndex(
+            (image) => image.getAttribute('aria-hidden') === 'false',
+          ),
+        );
+    const lpLink = carousel.getByRole('link', {
+      name: 'BUY THE LP',
+      exact: true,
     });
+
+    const activeImageIndex = await getActiveImageIndex();
+    expect(activeImageIndex).toBeGreaterThanOrEqual(0);
+
+    await carousel.hover();
+    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
+    await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
+
+    await lpLink.focus();
+    await page.mouse.move(1, 1);
+    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
+    await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
+    await expect(carousel.getByRole('button')).toHaveCount(0);
+  });
+
+  test('home purchase carousel disables autoplay for reduced motion', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== 'chromium',
+      'Desktop timing coverage is enough.',
+    );
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
+    await expect(carousel.locator('img').nth(1)).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+  });
+
+  test('home purchase feature fits Pixel 7 without overflow or undersized CTAs', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== 'mobile',
+      'Mobile layout coverage only.',
+    );
+    await page.setViewportSize({ width: 412, height: 915 });
+    await page.goto('/');
+
+    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
+    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
+    const panelBox = await carousel
+      .locator('[data-carousel-media]')
+      .boundingBox();
+    const ctaBox = await carousel
+      .getByRole('link', { name: 'BUY THE LP', exact: true })
+      .boundingBox();
+    const noteBox = await purchaseFeature
+      .getByText(getdownDescription[2])
+      .boundingBox();
+
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBe(412);
+    expect(ctaBox?.height).toBeGreaterThanOrEqual(44);
+    expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
+    expect(noteBox?.y).toBeLessThan(ctaBox?.y ?? 0);
+    expect(ctaBox?.y).toBeGreaterThanOrEqual(
+      (noteBox?.y ?? 0) + (noteBox?.height ?? 0),
+    );
+    expect(panelBox?.y).toBeGreaterThanOrEqual(
+      (ctaBox?.y ?? 0) + (ctaBox?.height ?? 0),
+    );
+    await expect(page.getByText(getdownDescription[2])).toBeVisible();
   });
 
   test('open status automation only shows open during opening hours', () => {
@@ -368,7 +636,7 @@ test.describe('public routes', () => {
   test('site photos use consistent rounded corners', async ({ page }) => {
     await page.goto('/');
     await expect(
-      page.getByRole('img', { name: homeWhatWeDo.shopfrontImage.alt }),
+      page.getByLabel(homePurchaseFeature.ariaLabel).locator('img').first(),
     ).toHaveCSS('border-radius', '19.2px');
 
     await page.goto('/about/');
