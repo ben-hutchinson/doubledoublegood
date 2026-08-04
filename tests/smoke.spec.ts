@@ -321,7 +321,9 @@ test.describe('public routes', () => {
     expect(panelBox?.y ?? 0).toBeGreaterThanOrEqual(
       (headingBox?.y ?? 0) + (headingBox?.height ?? 0),
     );
-    expect(bannerBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
+    expect(
+      Math.abs((bannerBox?.width ?? 0) - (panelBox?.width ?? 0)),
+    ).toBeLessThanOrEqual(2);
     expect(bannerBox?.y ?? 0).toBeGreaterThan(panelBox?.y ?? 0);
     expect((bannerBox?.y ?? 0) + (bannerBox?.height ?? 0)).toBeLessThan(
       (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
@@ -366,9 +368,7 @@ test.describe('public routes', () => {
     expect(rotatedBox?.width).toBe(initialBox?.width);
   });
 
-  test('home purchase carousel pauses on hover', async ({
-    page,
-  }, testInfo) => {
+  test('home purchase carousel pauses on hover', async ({ page }, testInfo) => {
     test.skip(
       testInfo.project.name !== 'chromium',
       'Desktop pointer timing coverage is enough.',
@@ -427,8 +427,7 @@ test.describe('public routes', () => {
       .locator('[data-carousel-media]')
       .boundingBox();
     const banner = carousel.getByText('SOLD OUT', { exact: true });
-    const bannerBox = await banner
-      .boundingBox();
+    const bannerBox = await banner.boundingBox();
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),

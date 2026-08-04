@@ -23,10 +23,12 @@
 ### Task 1: Define the sold-out homepage behaviour with failing browser tests
 
 **Files:**
+
 - Modify: `tests/smoke.spec.ts:25-471`
 - Delete: `tests/home-purchase-feature.spec.tsx`
 
 **Interfaces:**
+
 - Consumes: `homePurchaseFeature.heading`, `homePurchaseFeature.soldOutLabel`, `homePurchaseFeature.rotationIntervalMs`, and the rendered carousel region.
 - Produces: Browser-level expectations for sold-out content, persistent overlay, rotation, hover pause, reduced motion, and mobile containment.
 
@@ -88,12 +90,14 @@ git commit -m "Test Getdown sold-out homepage state"
 ### Task 2: Render the sold-out banner and remove active purchase configuration
 
 **Files:**
+
 - Modify: `src/components/home-purchase-feature.tsx`
 - Modify: `src/lib/site-content.ts:1-44,360-390`
 - Modify: `playwright.config.ts:1-7`
 - Modify: `.github/workflows/doubledoublegood-build.yaml:35-45`
 
 **Interfaces:**
+
 - Consumes: `ImageCarousel` props `header?: ReactNode` and `overlay?: ReactNode`.
 - Produces: `homePurchaseFeature.soldOutLabel: string` and a non-interactive overlay marked with `data-sold-out-banner`.
 
@@ -155,9 +159,11 @@ git commit -m "Show Getdown event as sold out"
 ### Task 3: Complete repository and rendered QA
 
 **Files:**
+
 - Modify only files required to resolve failures caused by Tasks 1-2.
 
 **Interfaces:**
+
 - Consumes: completed sold-out homepage state.
 - Produces: verified build and responsive visual evidence.
 
