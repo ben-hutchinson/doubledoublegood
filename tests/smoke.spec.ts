@@ -22,16 +22,9 @@ import {
   getOpenStatusMessage,
   parseWeeklyOpeningHours,
 } from '../src/lib/open-status';
-import { stripePaymentLinkFixtures } from './stripe-payment-link-fixtures';
-
 const routes = [...siteRoutes];
 const shopClosureTickerMessage =
   'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS';
-const getdownDescription = [
-  "Join us as we celebrate the release of 'Massive Champion', the brand-new album from Getdown Services.",
-  "The band will be visiting the shop for a special appearance to mark the launch and we're really looking forward to welcoming them.",
-  'Entry is free so long as you purchase the LP below.',
-] as const;
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -244,15 +237,16 @@ test.describe('public routes', () => {
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
-  test('home purchase carousel shows two contained posters and one persistent LP purchase choice', async ({
+  test('Getdown carousel shows two contained posters and a persistent sold-out state', async ({
     page,
   }) => {
     await page.goto('/');
 
-    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
+    const soldOutFeature = page.getByLabel('Getdown Services sold-out event');
     const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
     const images = carousel.locator('img');
     const media = carousel.locator('[data-carousel-media]');
+    const soldOutBanner = carousel.getByText('SOLD OUT', { exact: true });
 
     await expect(images).toHaveCount(2);
     await expect(images.first()).toHaveAttribute('aria-hidden', 'false');
@@ -263,29 +257,22 @@ test.describe('public routes', () => {
     await expect(images.first()).toHaveCSS('transition-duration', '0.7s');
     await expect(carousel.locator('.media-zoom')).toHaveCount(0);
     await expect(carousel.getByRole('button')).toHaveCount(0);
-    await expect(media.locator(':scope > div')).toHaveCount(0);
-    const purchaseCta = carousel.locator('[data-purchase-cta]');
-    const purchaseCtaChildren = purchaseCta.locator(':scope > *');
-
-    await expect(purchaseCta).toBeVisible();
+    await expect(media.locator(':scope > [data-sold-out-banner]')).toHaveCount(
+      1,
+    );
     await expect(
-      carousel.locator('[data-purchase-cta] + [data-carousel-media]'),
-    ).toBeVisible();
-    await expect(
-      purchaseCta.getByRole('heading', {
+      soldOutFeature.getByRole('heading', {
+        level: 2,
         name: 'GETDOWN SERVICES IN-STORE',
         exact: true,
       }),
     ).toBeVisible();
-    await expect(purchaseCta.locator(':scope > p')).toHaveText(
-      getdownDescription,
+    await expect(soldOutBanner).toBeVisible();
+    await expect(soldOutBanner).toHaveCSS(
+      'background-color',
+      'rgb(186, 43, 32)',
     );
-    await expect(purchaseCtaChildren.nth(0)).toHaveRole('heading');
-    await expect(purchaseCtaChildren.nth(1)).toHaveText(getdownDescription[0]);
-    await expect(purchaseCtaChildren.nth(2)).toHaveText(getdownDescription[1]);
-    await expect(purchaseCtaChildren.nth(3)).toHaveText(getdownDescription[2]);
-    await expect(purchaseCtaChildren.nth(4)).toHaveRole('link');
-    await expect(purchaseCtaChildren.nth(4)).toHaveText('BUY THE LP');
+    await expect(soldOutBanner).toHaveCSS('color', 'rgb(255, 255, 255)');
     await expect(images.nth(1)).toHaveAttribute(
       'src',
       /getdown-services-album-art\.jpeg/,
@@ -294,21 +281,17 @@ test.describe('public routes', () => {
       'alt',
       'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
     );
+    await expect(soldOutFeature.getByRole('link')).toHaveCount(0);
     await expect(
-      carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
-    ).toHaveAttribute('href', stripePaymentLinkFixtures.lp);
-    await expect(carousel.getByRole('link')).toHaveCount(1);
-    await expect(carousel.locator('a[target]')).toHaveCount(0);
-    await expect(page.getByText(getdownDescription[2])).toBeVisible();
-    await expect(
-      purchaseFeature.getByRole('link', { name: 'Delivery & Returns' }),
+      soldOutFeature.getByText('BUY THE LP', { exact: true }),
     ).toHaveCount(0);
-    await expect(
-      purchaseFeature.getByRole('link', { name: 'Privacy' }),
-    ).toHaveCount(0);
+    await expect(soldOutFeature.locator('[aria-disabled="true"]')).toHaveCount(
+      0,
+    );
+    await expect(soldOutFeature.locator('p')).toHaveCount(0);
   });
 
-  test('home purchase note and full-width LP button sit above the desktop panel', async ({
+  test('Getdown title sits above the desktop panel and sold-out banner spans its media', async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -317,25 +300,32 @@ test.describe('public routes', () => {
     );
     await page.goto('/');
 
-    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
-    const featureBox = await purchaseFeature.boundingBox();
+    const soldOutFeature = page.getByLabel('Getdown Services sold-out event');
+    const featureBox = await soldOutFeature.boundingBox();
     const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
     const panelBox = await carousel
       .locator('[data-carousel-media]')
       .boundingBox();
-    const ctaBox = await carousel
-      .getByRole('link', { name: 'BUY THE LP', exact: true })
+    const headingBox = await soldOutFeature
+      .getByRole('heading', {
+        level: 2,
+        name: 'GETDOWN SERVICES IN-STORE',
+        exact: true,
+      })
       .boundingBox();
-    const noteBox = await purchaseFeature
-      .getByText(getdownDescription[2])
+    const bannerBox = await carousel
+      .getByText('SOLD OUT', { exact: true })
       .boundingBox();
 
-    expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
-    expect(noteBox?.y).toBeLessThan(ctaBox?.y ?? 0);
-    expect(ctaBox?.y).toBeGreaterThanOrEqual(
-      (noteBox?.y ?? 0) + (noteBox?.height ?? 0),
+    expect(headingBox?.y).toBeLessThan(panelBox?.y ?? 0);
+    expect(panelBox?.y ?? 0).toBeGreaterThanOrEqual(
+      (headingBox?.y ?? 0) + (headingBox?.height ?? 0),
     );
-    expect(panelBox?.y ?? 0).toBeGreaterThanOrEqual(ctaBox?.y ?? 0);
+    expect(bannerBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
+    expect(bannerBox?.y ?? 0).toBeGreaterThan(panelBox?.y ?? 0);
+    expect((bannerBox?.y ?? 0) + (bannerBox?.height ?? 0)).toBeLessThan(
+      (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
+    );
     expect(
       Math.abs(
         (featureBox?.y ?? 0) +
@@ -369,16 +359,14 @@ test.describe('public routes', () => {
       'aria-hidden',
       'false',
     );
-    await expect(
-      carousel.getByRole('link', { name: 'BUY THE LP', exact: true }),
-    ).toBeVisible();
+    await expect(carousel.getByText('SOLD OUT', { exact: true })).toBeVisible();
 
     const rotatedBox = await panel.boundingBox();
     expect(rotatedBox?.height).toBe(initialBox?.height);
     expect(rotatedBox?.width).toBe(initialBox?.width);
   });
 
-  test('home purchase carousel pauses on hover and CTA focus', async ({
+  test('home purchase carousel pauses on hover', async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -397,20 +385,10 @@ test.describe('public routes', () => {
             (image) => image.getAttribute('aria-hidden') === 'false',
           ),
         );
-    const lpLink = carousel.getByRole('link', {
-      name: 'BUY THE LP',
-      exact: true,
-    });
-
     const activeImageIndex = await getActiveImageIndex();
     expect(activeImageIndex).toBeGreaterThanOrEqual(0);
 
     await carousel.hover();
-    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
-    await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
-
-    await lpLink.focus();
-    await page.mouse.move(1, 1);
     await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
     await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
     await expect(carousel.getByRole('button')).toHaveCount(0);
@@ -434,7 +412,7 @@ test.describe('public routes', () => {
     );
   });
 
-  test('home purchase feature fits Pixel 7 without overflow or undersized CTAs', async ({
+  test('Getdown sold-out banner fits Pixel 7 without overflow or wrapping', async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -445,30 +423,20 @@ test.describe('public routes', () => {
     await page.goto('/');
 
     const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const purchaseFeature = page.getByLabel('Getdown Services event purchase');
     const panelBox = await carousel
       .locator('[data-carousel-media]')
       .boundingBox();
-    const ctaBox = await carousel
-      .getByRole('link', { name: 'BUY THE LP', exact: true })
-      .boundingBox();
-    const noteBox = await purchaseFeature
-      .getByText(getdownDescription[2])
+    const banner = carousel.getByText('SOLD OUT', { exact: true });
+    const bannerBox = await banner
       .boundingBox();
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(412);
-    expect(ctaBox?.height).toBeGreaterThanOrEqual(44);
-    expect(ctaBox?.width).toBeCloseTo(panelBox?.width ?? 0, 0);
-    expect(noteBox?.y).toBeLessThan(ctaBox?.y ?? 0);
-    expect(ctaBox?.y).toBeGreaterThanOrEqual(
-      (noteBox?.y ?? 0) + (noteBox?.height ?? 0),
-    );
-    expect(panelBox?.y).toBeGreaterThanOrEqual(
-      (ctaBox?.y ?? 0) + (ctaBox?.height ?? 0),
-    );
-    await expect(page.getByText(getdownDescription[2])).toBeVisible();
+    expect(bannerBox?.width).toBeLessThanOrEqual(panelBox?.width ?? 0);
+    expect(bannerBox?.x).toBeGreaterThanOrEqual(panelBox?.x ?? 0);
+    await expect(banner).toHaveCSS('white-space', 'nowrap');
+    await expect(banner).toBeVisible();
   });
 
   test('open status automation only shows open during opening hours', () => {
