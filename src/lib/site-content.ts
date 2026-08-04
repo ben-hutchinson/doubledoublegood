@@ -67,9 +67,8 @@ export function getGigTickerEnabledMode(
 
 export function shouldShowGigTicker({
   enabledMode,
-  events,
 }: GigTickerVisibilityConfig) {
-  return enabledMode === 'enabled' && events.length > 0;
+  return enabledMode === 'enabled';
 }
 
 export const bannedMockupValues = [
@@ -133,12 +132,7 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [
-    {
-      message:
-        'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS',
-    },
-  ] satisfies GigTickerEvent[],
+  events: [] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [

@@ -193,7 +193,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header shows the shop closure notice in the ticker', async ({
+  test('header keeps the shop notice ticker without an obsolete message', async ({
     page,
   }) => {
     await page.goto('/');
@@ -201,13 +201,10 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
-    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
-
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(
-      visibleTickerText.getByText(shopClosureTickerMessage).first(),
-    ).toBeVisible();
+    await expect(ticker.locator('.gig-ticker__viewport')).toHaveCount(0);
+    await expect(page.getByText(shopClosureTickerMessage)).toHaveCount(0);
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -233,7 +230,7 @@ test.describe('public routes', () => {
         enabledMode: 'enabled',
         events: [],
       }),
-    ).toBe(false);
+    ).toBe(true);
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
