@@ -325,6 +325,11 @@ test.describe('public routes', () => {
       (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
     );
     expect(
+      (bannerBox?.y ?? 0) +
+        (bannerBox?.height ?? 0) / 2 -
+        ((panelBox?.y ?? 0) + (panelBox?.height ?? 0) / 2),
+    ).toBeCloseTo(-50, 0);
+    expect(
       Math.abs(
         (featureBox?.y ?? 0) +
           (featureBox?.height ?? 0) -

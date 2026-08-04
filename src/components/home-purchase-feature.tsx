@@ -22,7 +22,7 @@ export function HomePurchaseFeature() {
         items={homePurchaseFeature.slides}
         overlay={
           <div
-            className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 border-y border-white/50 bg-[#ba2b20] px-4 py-4 text-center text-3xl font-black tracking-[0.16em] whitespace-nowrap text-white uppercase shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:py-5 sm:text-5xl"
+            className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -mt-[50px] -translate-y-1/2 border-y border-white/50 bg-[#ba2b20] px-4 py-4 text-center text-3xl font-black tracking-[0.16em] whitespace-nowrap text-white uppercase shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:py-5 sm:text-5xl"
             data-sold-out-banner
           >
             {homePurchaseFeature.soldOutLabel}
