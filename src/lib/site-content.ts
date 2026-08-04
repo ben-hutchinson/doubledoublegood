@@ -1,8 +1,6 @@
 import {
   getTrustedExternalUrl,
   getTrustedSiteUrl,
-  getTrustedStripePaymentLink,
-  shouldAllowStripeTestPaymentLinks,
   trustedHostnames,
 } from '@/lib/security';
 
@@ -29,18 +27,12 @@ export type PolicySection = {
   paragraphs: string[];
 };
 
-export type HomePurchaseOffer = {
-  href: string;
-  label: string;
-};
-
 type HomePurchaseFeature = {
   ariaLabel: string;
-  description: string[];
   heading: string;
-  offer: HomePurchaseOffer;
   rotationIntervalMs: number;
   slides: CarouselImage[];
+  soldOutLabel: string;
 };
 
 export type CommunityContent = {
@@ -75,9 +67,8 @@ export function getGigTickerEnabledMode(
 
 export function shouldShowGigTicker({
   enabledMode,
-  events,
 }: GigTickerVisibilityConfig) {
-  return enabledMode === 'enabled' && events.length > 0;
+  return enabledMode === 'enabled';
 }
 
 export const bannedMockupValues = [
@@ -141,12 +132,7 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [
-    {
-      message:
-        'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS',
-    },
-  ] satisfies GigTickerEvent[],
+  events: [] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -357,37 +343,17 @@ export const homeWhatWeDo = {
     "From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.",
 };
 
-const allowStripeTestMode = shouldAllowStripeTestPaymentLinks(
-  process.env.NODE_ENV,
-  process.env.ALLOW_STRIPE_TEST_PAYMENT_LINKS,
-);
-
 export const homePurchaseFeature: HomePurchaseFeature = {
-  ariaLabel: 'Getdown Services purchase carousel',
-  description: [
-    "Join us as we celebrate the release of 'Massive Champion', the brand-new album from Getdown Services.",
-    "The band will be visiting the shop for a special appearance to mark the launch and we're really looking forward to welcoming them.",
-    'Entry is free so long as you purchase the LP below.',
-  ],
+  ariaLabel: 'Getdown Services sold-out carousel',
   heading: 'GETDOWN SERVICES IN-STORE',
-  offer: {
-    href: getTrustedStripePaymentLink(
-      process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK,
-      { allowTestMode: allowStripeTestMode },
-    ),
-    label: 'BUY THE LP',
-  },
   rotationIntervalMs: 5000,
   slides: [
     {
       alt: 'Getdown Services Massive Champion in-store tour poster, including the Stafford show at Double Double Good on 19 August',
       src: '/assets/home/getdown-tour-pic.jpg',
     },
-    {
-      alt: 'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
-      src: '/assets/home/getdown-services-album-art.jpeg',
-    },
   ],
+  soldOutLabel: 'SOLD OUT',
 };
 
 export const findUsContent = {

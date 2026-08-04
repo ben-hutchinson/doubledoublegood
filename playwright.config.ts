@@ -1,10 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-import { stripePaymentLinkFixtures } from './tests/stripe-payment-link-fixtures';
-
-process.env.NEXT_PUBLIC_STRIPE_LP_PAYMENT_LINK = stripePaymentLinkFixtures.lp;
-process.env.ALLOW_STRIPE_TEST_PAYMENT_LINKS = 'true';
-
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
