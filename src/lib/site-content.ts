@@ -352,10 +352,6 @@ export const homePurchaseFeature: HomePurchaseFeature = {
       alt: 'Getdown Services Massive Champion in-store tour poster, including the Stafford show at Double Double Good on 19 August',
       src: '/assets/home/getdown-tour-pic.jpg',
     },
-    {
-      alt: 'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
-      src: '/assets/home/getdown-services-album-art.jpeg',
-    },
   ],
   soldOutLabel: 'SOLD OUT',
 };

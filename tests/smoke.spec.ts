@@ -234,7 +234,7 @@ test.describe('public routes', () => {
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
-  test('Getdown carousel shows two contained posters and a persistent sold-out state', async ({
+  test('Getdown feature shows one contained poster and a persistent sold-out state', async ({
     page,
   }) => {
     await page.goto('/');
@@ -245,10 +245,8 @@ test.describe('public routes', () => {
     const media = carousel.locator('[data-carousel-media]');
     const soldOutBanner = carousel.getByText('SOLD OUT', { exact: true });
 
-    await expect(images).toHaveCount(2);
+    await expect(images).toHaveCount(1);
     await expect(images.first()).toHaveAttribute('aria-hidden', 'false');
-    await expect(images.nth(1)).toHaveAttribute('aria-hidden', 'true');
-    await expect(images.nth(1)).toHaveAttribute('loading', 'eager');
     await expect(images.first()).toHaveCSS('object-fit', 'contain');
     await expect(images.first()).toHaveCSS('padding-bottom', '0px');
     await expect(images.first()).toHaveCSS('transition-duration', '0.7s');
@@ -270,14 +268,15 @@ test.describe('public routes', () => {
       'rgb(186, 43, 32)',
     );
     await expect(soldOutBanner).toHaveCSS('color', 'rgb(255, 255, 255)');
-    await expect(images.nth(1)).toHaveAttribute(
+    await expect(images.first()).toHaveAttribute(
       'src',
-      /getdown-services-album-art\.jpeg/,
+      /getdown-tour-pic\.jpg/,
     );
-    await expect(images.nth(1)).toHaveAttribute(
-      'alt',
-      'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
-    );
+    await expect(
+      carousel.getByAltText(
+        'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
+      ),
+    ).toHaveCount(0);
     await expect(soldOutFeature.getByRole('link')).toHaveCount(0);
     await expect(
       soldOutFeature.getByText('BUY THE LP', { exact: true }),
@@ -332,81 +331,6 @@ test.describe('public routes', () => {
           ((panelBox?.y ?? 0) + (panelBox?.height ?? 0)),
       ),
     ).toBeLessThanOrEqual(1);
-  });
-
-  test('home purchase carousel rotates after five seconds without moving its panel', async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== 'chromium',
-      'Desktop timing coverage is enough.',
-    );
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/');
-    await page.mouse.move(1, 1);
-
-    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const panel = carousel.locator('[data-carousel-media]');
-    const initialBox = await panel.boundingBox();
-
-    await expect(carousel.locator('img').nth(1)).toHaveAttribute(
-      'aria-hidden',
-      'true',
-    );
-    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 250);
-    await expect(carousel.locator('img').nth(1)).toHaveAttribute(
-      'aria-hidden',
-      'false',
-    );
-    await expect(carousel.getByText('SOLD OUT', { exact: true })).toBeVisible();
-
-    const rotatedBox = await panel.boundingBox();
-    expect(rotatedBox?.height).toBe(initialBox?.height);
-    expect(rotatedBox?.width).toBe(initialBox?.width);
-  });
-
-  test('home purchase carousel pauses on hover', async ({ page }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== 'chromium',
-      'Desktop pointer timing coverage is enough.',
-    );
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/');
-
-    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const getActiveImageIndex = () =>
-      carousel
-        .locator('img')
-        .evaluateAll((images) =>
-          images.findIndex(
-            (image) => image.getAttribute('aria-hidden') === 'false',
-          ),
-        );
-    const activeImageIndex = await getActiveImageIndex();
-    expect(activeImageIndex).toBeGreaterThanOrEqual(0);
-
-    await carousel.hover();
-    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
-    await expect.poll(getActiveImageIndex).toBe(activeImageIndex);
-    await expect(carousel.getByRole('button')).toHaveCount(0);
-  });
-
-  test('home purchase carousel disables autoplay for reduced motion', async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== 'chromium',
-      'Desktop timing coverage is enough.',
-    );
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
-
-    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    await page.waitForTimeout(homePurchaseFeature.rotationIntervalMs + 150);
-    await expect(carousel.locator('img').nth(1)).toHaveAttribute(
-      'aria-hidden',
-      'true',
-    );
   });
 
   test('Getdown sold-out banner fits Pixel 7 without overflow or wrapping', async ({
