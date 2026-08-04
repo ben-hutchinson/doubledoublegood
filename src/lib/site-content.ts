@@ -132,7 +132,11 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [] satisfies GigTickerEvent[],
+  events: [
+    {
+      message: 'GETDOWN SERVICES INSTORE EVENT IS NOW SOLD OUT',
+    },
+  ] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
