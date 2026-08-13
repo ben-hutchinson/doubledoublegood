@@ -134,7 +134,8 @@ export const gigTickerContent = {
   eyebrow: 'Shop notice',
   events: [
     {
-      message: 'GETDOWN SERVICES INSTORE EVENT IS NOW SOLD OUT',
+      message:
+        'Shop open at 1100hrs Fri 14 Aug. Apologies for any inconvenience',
     },
   ] satisfies GigTickerEvent[],
 };
