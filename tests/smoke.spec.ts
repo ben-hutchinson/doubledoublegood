@@ -25,8 +25,8 @@ import {
 const routes = [...siteRoutes];
 const shopClosureTickerMessage =
   'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS';
-const getdownSoldOutTickerMessage =
-  'GETDOWN SERVICES INSTORE EVENT IS NOW SOLD OUT';
+const shopOpeningTickerMessage =
+  'Shop open at 1100hrs Fri 14 Aug. Apologies for any inconvenience';
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -195,7 +195,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header shows the sold-out Getdown notice in the ticker', async ({
+  test('header shows the shop opening notice in the ticker', async ({
     page,
   }) => {
     await page.goto('/');
@@ -210,7 +210,7 @@ test.describe('public routes', () => {
     await expect(visibleTickerText).toHaveCount(1);
     await expect(
       visibleTickerText.locator('.gig-ticker__text').first(),
-    ).toHaveText(getdownSoldOutTickerMessage);
+    ).toHaveText(shopOpeningTickerMessage);
     await expect(page.getByText(shopClosureTickerMessage)).toHaveCount(0);
   });
 
