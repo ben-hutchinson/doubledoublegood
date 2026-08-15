@@ -135,7 +135,7 @@ export const gigTickerContent = {
   events: [
     {
       message:
-        'Shop open at 1100hrs Fri 14 Aug. Apologies for any inconvenience',
+        'For those that have pre bought the album from us the Live Instore Performance starts at 1900hrs on Wednesday. Doors will open at 1830hrs. See you there.',
     },
   ] satisfies GigTickerEvent[],
 };
