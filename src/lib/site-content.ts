@@ -134,7 +134,8 @@ export const gigTickerContent = {
   eyebrow: 'Shop notice',
   events: [
     {
-      message: 'GETDOWN SERVICES INSTORE EVENT IS NOW SOLD OUT',
+      message:
+        'For those that have pre bought the album from us the Live Instore Performance starts at 1900hrs on Wednesday. Doors will open at 1830hrs. See you there.',
     },
   ] satisfies GigTickerEvent[],
 };
