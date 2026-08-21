@@ -7,7 +7,6 @@ import {
   businessDetails,
   carouselItems,
   communityContent,
-  homePurchaseFeature,
   homeWhatWeDo,
   integrationSettings,
   getHeaderOpenStatusBadgeMode,
@@ -23,10 +22,6 @@ import {
   parseWeeklyOpeningHours,
 } from '../src/lib/open-status';
 const routes = [...siteRoutes];
-const shopClosureTickerMessage =
-  'THE SHOP WILL BE CLOSED SATURDAY 25th JULY REOPENING TUESDAY 28th JULY @1000HRS';
-const livePerformanceTickerMessage =
-  'For those that have pre bought the Getdown Services album from us the Live Instore Performance starts at 1900hrs on Wednesday. Doors will open at 1830hrs. See you there.';
 
 // Keep these assertions aligned with the current agreed product behavior in PRD.md.
 function canonicalUrl(pathname: string) {
@@ -195,7 +190,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header shows the live performance notice in the ticker', async ({
+  test('header keeps the empty shop notice ticker without gig text', async ({
     page,
   }) => {
     await page.goto('/');
@@ -203,15 +198,11 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
-    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(visibleTickerText).toHaveCount(1);
-    await expect(
-      visibleTickerText.locator('.gig-ticker__text').first(),
-    ).toHaveText(livePerformanceTickerMessage);
-    await expect(page.getByText(shopClosureTickerMessage)).toHaveCount(0);
+    await expect(ticker.locator('.gig-ticker__viewport')).toHaveCount(0);
+    await expect(ticker.getByRole('list')).toHaveCount(0);
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -241,134 +232,21 @@ test.describe('public routes', () => {
     expect(shouldShowGigTicker(gigTickerContent)).toBe(true);
   });
 
-  test('Getdown feature shows one contained poster and a persistent sold-out state', async ({
+  test('home page shows the Ancient High House shopfront instead of gig artwork', async ({
     page,
   }) => {
     await page.goto('/');
 
-    const soldOutFeature = page.getByLabel('Getdown Services sold-out event');
-    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const images = carousel.locator('img');
-    const media = carousel.locator('[data-carousel-media]');
-    const soldOutBanner = carousel.getByText('SOLD OUT', { exact: true });
+    const shopfront = page.getByRole('img', {
+      name: 'The Double Double Good shopfront at the Ancient High House',
+    });
 
-    await expect(images).toHaveCount(1);
-    await expect(images.first()).toHaveAttribute('aria-hidden', 'false');
-    await expect(images.first()).toHaveCSS('object-fit', 'contain');
-    await expect(images.first()).toHaveCSS('padding-bottom', '0px');
-    await expect(images.first()).toHaveCSS('transition-duration', '0.7s');
-    await expect(carousel.locator('.media-zoom')).toHaveCount(0);
-    await expect(carousel.getByRole('button')).toHaveCount(0);
-    await expect(media.locator(':scope > [data-sold-out-banner]')).toHaveCount(
-      1,
-    );
+    await expect(shopfront).toBeVisible();
+    await expect(shopfront).toHaveAttribute('src', /shopfront\.jpg/);
+    await expect(page.getByText('SOLD OUT', { exact: true })).toHaveCount(0);
     await expect(
-      soldOutFeature.getByRole('heading', {
-        level: 2,
-        name: 'GETDOWN SERVICES IN-STORE',
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(soldOutBanner).toBeVisible();
-    await expect(soldOutBanner).toHaveCSS(
-      'background-color',
-      'rgb(186, 43, 32)',
-    );
-    await expect(soldOutBanner).toHaveCSS('color', 'rgb(255, 255, 255)');
-    await expect(images.first()).toHaveAttribute(
-      'src',
-      /getdown-tour-pic\.jpg/,
-    );
-    await expect(
-      carousel.getByAltText(
-        'Getdown Services album artwork featuring a hand-drawn figure on layered notepaper',
-      ),
+      page.getByText('GETDOWN SERVICES IN-STORE', { exact: true }),
     ).toHaveCount(0);
-    await expect(soldOutFeature.getByRole('link')).toHaveCount(0);
-    await expect(
-      soldOutFeature.getByText('BUY THE LP', { exact: true }),
-    ).toHaveCount(0);
-    await expect(soldOutFeature.locator('[aria-disabled="true"]')).toHaveCount(
-      0,
-    );
-    await expect(soldOutFeature.locator('p')).toHaveCount(0);
-  });
-
-  test('Getdown title sits above the desktop panel and sold-out banner spans its media', async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== 'chromium',
-      'Desktop layout coverage only.',
-    );
-    await page.goto('/');
-
-    const soldOutFeature = page.getByLabel('Getdown Services sold-out event');
-    const featureBox = await soldOutFeature.boundingBox();
-    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const panelBox = await carousel
-      .locator('[data-carousel-media]')
-      .boundingBox();
-    const headingBox = await soldOutFeature
-      .getByRole('heading', {
-        level: 2,
-        name: 'GETDOWN SERVICES IN-STORE',
-        exact: true,
-      })
-      .boundingBox();
-    const bannerBox = await carousel
-      .getByText('SOLD OUT', { exact: true })
-      .boundingBox();
-
-    expect(headingBox?.y).toBeLessThan(panelBox?.y ?? 0);
-    expect(panelBox?.y ?? 0).toBeGreaterThanOrEqual(
-      (headingBox?.y ?? 0) + (headingBox?.height ?? 0),
-    );
-    expect(
-      Math.abs((bannerBox?.width ?? 0) - (panelBox?.width ?? 0)),
-    ).toBeLessThanOrEqual(2);
-    expect(bannerBox?.y ?? 0).toBeGreaterThan(panelBox?.y ?? 0);
-    expect((bannerBox?.y ?? 0) + (bannerBox?.height ?? 0)).toBeLessThan(
-      (panelBox?.y ?? 0) + (panelBox?.height ?? 0),
-    );
-    expect(
-      (bannerBox?.y ?? 0) +
-        (bannerBox?.height ?? 0) / 2 -
-        ((panelBox?.y ?? 0) + (panelBox?.height ?? 0) / 2),
-    ).toBeCloseTo(-50, 0);
-    expect(
-      Math.abs(
-        (featureBox?.y ?? 0) +
-          (featureBox?.height ?? 0) -
-          ((panelBox?.y ?? 0) + (panelBox?.height ?? 0)),
-      ),
-    ).toBeLessThanOrEqual(1);
-  });
-
-  test('Getdown sold-out banner fits Pixel 7 without overflow or wrapping', async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== 'mobile',
-      'Mobile layout coverage only.',
-    );
-    await page.setViewportSize({ width: 412, height: 915 });
-    await page.goto('/');
-
-    const carousel = page.getByLabel(homePurchaseFeature.ariaLabel);
-    const panelBox = await carousel
-      .locator('[data-carousel-media]')
-      .boundingBox();
-    const banner = carousel.getByText('SOLD OUT', { exact: true });
-    const bannerBox = await banner.boundingBox();
-
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth),
-    ).toBe(412);
-    expect(bannerBox?.width).toBeLessThanOrEqual(panelBox?.width ?? 0);
-    expect(bannerBox?.x).toBeGreaterThanOrEqual(panelBox?.x ?? 0);
-    await expect(banner).toHaveCSS('white-space', 'nowrap');
-    await expect(banner).toBeVisible();
   });
 
   test('open status automation only shows open during opening hours', () => {
@@ -536,7 +414,7 @@ test.describe('public routes', () => {
   test('site photos use consistent rounded corners', async ({ page }) => {
     await page.goto('/');
     await expect(
-      page.getByLabel(homePurchaseFeature.ariaLabel).locator('img').first(),
+      page.getByRole('img', { name: homeWhatWeDo.shopfrontImage.alt }),
     ).toHaveCSS('border-radius', '19.2px');
 
     await page.goto('/about/');

@@ -1,5 +1,6 @@
+import Image from 'next/image';
+
 import { ContentCard } from '@/components/content-card';
-import { HomePurchaseFeature } from '@/components/home-purchase-feature';
 import { InstagramReelPanel } from '@/components/instagram-reel-panel';
 import {
   businessDetails,
@@ -38,7 +39,19 @@ export default function HomePage() {
               />
             </div>
 
-            <HomePurchaseFeature />
+            <div className="media-zoom rounded-[1.2rem] xl:h-full">
+              <Image
+                alt={homeWhatWeDo.shopfrontImage.alt}
+                className="h-full min-h-[30rem] w-full rounded-[1.2rem] object-cover xl:min-h-full"
+                height={homeWhatWeDo.shopfrontImage.height}
+                sizes="(min-width: 1280px) 44vw, 100vw"
+                src={homeWhatWeDo.shopfrontImage.src}
+                style={{
+                  objectPosition: homeWhatWeDo.shopfrontImage.objectPosition,
+                }}
+                width={homeWhatWeDo.shopfrontImage.width}
+              />
+            </div>
           </div>
         </section>
       </div>
