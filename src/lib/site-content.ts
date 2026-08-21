@@ -27,14 +27,6 @@ export type PolicySection = {
   paragraphs: string[];
 };
 
-type HomePurchaseFeature = {
-  ariaLabel: string;
-  heading: string;
-  rotationIntervalMs: number;
-  slides: CarouselImage[];
-  soldOutLabel: string;
-};
-
 export type CommunityContent = {
   title: string;
   intro: string;
@@ -132,12 +124,7 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [
-    {
-      message:
-        'For those that have pre bought the Getdown Services album from us the Live Instore Performance starts at 1900hrs on Wednesday. Doors will open at 1830hrs. See you there.',
-    },
-  ] satisfies GigTickerEvent[],
+  events: [] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -346,19 +333,13 @@ export const homeWhatWeDo = {
     "We're always looking to buy records too. Whether you've got a small selection or a full collection, we offer fair prices and a straightforward, honest approach.",
   closing:
     "From our beginnings in 2019 to where we are today, we're proud to be part of Stafford's music community and look forward to welcoming you in.",
-};
-
-export const homePurchaseFeature: HomePurchaseFeature = {
-  ariaLabel: 'Getdown Services sold-out carousel',
-  heading: 'GETDOWN SERVICES IN-STORE',
-  rotationIntervalMs: 5000,
-  slides: [
-    {
-      alt: 'Getdown Services Massive Champion in-store tour poster, including the Stafford show at Double Double Good on 19 August',
-      src: '/assets/home/getdown-tour-pic.jpg',
-    },
-  ],
-  soldOutLabel: 'SOLD OUT',
+  shopfrontImage: {
+    alt: 'The Double Double Good shopfront at the Ancient High House',
+    height: 1600,
+    objectPosition: '50% 46%',
+    src: '/shopfront.jpg',
+    width: 1200,
+  },
 };
 
 export const findUsContent = {
