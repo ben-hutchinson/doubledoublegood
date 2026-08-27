@@ -124,7 +124,12 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [] satisfies GigTickerEvent[],
+  events: [
+    {
+      message:
+        'ADVANCE NOTICE: THE SHOP WILL BE CLOSED ON TUES 1st SEP AND FRI 4th SEP. SORRY FOR ANY INCONVENIENCE.',
+    },
+  ] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [

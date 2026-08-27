@@ -190,7 +190,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header keeps the empty shop notice ticker without gig text', async ({
+  test('header shows the advance shop closure notice in the ticker', async ({
     page,
   }) => {
     await page.goto('/');
@@ -198,11 +198,16 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
+    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(ticker.locator('.gig-ticker__viewport')).toHaveCount(0);
-    await expect(ticker.getByRole('list')).toHaveCount(0);
+    await expect(visibleTickerText).toHaveCount(1);
+    await expect(
+      visibleTickerText.locator('.gig-ticker__text').first(),
+    ).toHaveText(
+      'ADVANCE NOTICE: THE SHOP WILL BE CLOSED ON TUES 1st SEP AND FRI 4th SEP. SORRY FOR ANY INCONVENIENCE.',
+    );
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
