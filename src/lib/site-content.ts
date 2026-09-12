@@ -124,12 +124,7 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [
-    {
-      message:
-        'ADVANCE NOTICE: THE SHOP WILL BE CLOSED ON TUES 1st SEP AND FRI 4th SEP. SORRY FOR ANY INCONVENIENCE.',
-    },
-  ] satisfies GigTickerEvent[],
+  events: [] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -204,7 +199,7 @@ export const integrationSettings = {
     process.env.NEXT_PUBLIC_REVIEWS_WIDGET_ID ??
     '5c9dd34d-87e7-4dbe-828b-63797bbbfcbb',
   instagramReelEmbedUrl: getTrustedExternalUrl(
-    'https://www.instagram.com/reel/DcnYIlssHjm/embed/',
+    'https://www.instagram.com/reel/DdLbajCMzeT/embed/',
     {
       allowedHostnames: trustedHostnames.instagramEmbed,
     },

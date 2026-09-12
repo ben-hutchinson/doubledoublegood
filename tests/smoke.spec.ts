@@ -190,7 +190,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header shows the advance shop closure notice in the ticker', async ({
+  test('header keeps the ticker bar after its scrolling message is cleared', async ({
     page,
   }) => {
     await page.goto('/');
@@ -198,16 +198,10 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
-    const visibleTickerText = ticker.locator('.gig-ticker__viewport');
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(visibleTickerText).toHaveCount(1);
-    await expect(
-      visibleTickerText.locator('.gig-ticker__text').first(),
-    ).toHaveText(
-      'ADVANCE NOTICE: THE SHOP WILL BE CLOSED ON TUES 1st SEP AND FRI 4th SEP. SORRY FOR ANY INCONVENIENCE.',
-    );
+    await expect(ticker.locator('.gig-ticker__viewport')).toHaveCount(0);
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -662,7 +656,7 @@ test.describe('public routes', () => {
 
   test('home instagram reel uses the latest requested reel', () => {
     expect(integrationSettings.instagramReelEmbedUrl).toBe(
-      'https://www.instagram.com/reel/DcnYIlssHjm/embed/',
+      'https://www.instagram.com/reel/DdLbajCMzeT/embed/',
     );
   });
 
