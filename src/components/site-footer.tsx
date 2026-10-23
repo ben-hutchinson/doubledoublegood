@@ -1,11 +1,21 @@
 import Link from 'next/link';
 
-import { NewsletterForm } from '@/components/newsletter-form';
 import {
   businessDetails,
   footerContent,
   navigationItems,
 } from '@/lib/site-content';
+import type { NavigationItem } from '@/lib/site-content';
+
+const exploreLinkColumns: NavigationItem[][] = [
+  navigationItems.slice(0, 4),
+  [
+    ...navigationItems.slice(4),
+    { href: '/delivery-returns', label: 'Delivery & Returns' },
+    { href: '/privacy', label: 'Privacy Policy' },
+    { href: '/', label: 'Home' },
+  ],
+];
 
 export function SiteFooter() {
   return (
@@ -68,41 +78,29 @@ export function SiteFooter() {
             ))}
           </p>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 md:col-span-2 lg:col-span-2">
           <h2 className="heading-section text-lg font-black text-white uppercase">
             Explore
           </h2>
-          <ul className="space-y-2 text-base leading-7 text-stone-200">
-            {navigationItems.map((item) => (
-              <li key={item.href}>
-                <Link className="link-sweep text-hover-accent" href={item.href}>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link
-                className="link-sweep text-hover-accent"
-                href="/delivery-returns"
+          <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
+            {exploreLinkColumns.map((column, index) => (
+              <ul
+                key={index}
+                className="space-y-2 text-lg leading-7 text-stone-200"
               >
-                Delivery &amp; Returns
-              </Link>
-            </li>
-            <li>
-              <Link className="link-sweep text-hover-accent" href="/privacy">
-                Privacy Policy
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="space-y-3 md:col-span-2 lg:col-span-1" id="newsletter">
-          <h2 className="heading-section text-lg font-black text-white uppercase">
-            {footerContent.newsletterTitle}
-          </h2>
-          <p className="max-w-sm text-base leading-6 text-stone-300">
-            {footerContent.newsletterCopy}
-          </p>
-          <NewsletterForm />
+                {column.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      className="link-sweep text-hover-accent"
+                      href={item.href}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
         </div>
       </div>
       <div className="mt-8 flex flex-col gap-2 border-t border-stone-700/60 pt-4 text-sm text-stone-400 sm:flex-row sm:items-center sm:justify-between">

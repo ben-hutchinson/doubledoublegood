@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 
 import { ImageCarousel } from '@/components/image-carousel';
 import { PageShell } from '@/components/page-shell';
@@ -45,26 +44,6 @@ export default function AboutPage() {
                 ))}
               </div>
             </article>
-          </div>
-        </section>
-
-        <section className="space-y-5 pt-8">
-          <header className="space-y-2">
-            <h2 className="heading-section text-2xl font-black text-stone-950 uppercase sm:text-3xl">
-              {aboutContent.ownerHeading}
-            </h2>
-          </header>
-          <div className="media-zoom relative h-[24rem] w-full overflow-hidden rounded-[1.2rem] bg-stone-100 sm:h-[34rem] lg:h-[42rem]">
-            <Image
-              fill
-              alt={aboutContent.ownerImage.alt}
-              className="absolute inset-0 h-full w-full rounded-[1.2rem] object-cover"
-              sizes="100vw"
-              src={aboutContent.ownerImage.src}
-              style={{
-                objectPosition: aboutContent.ownerImage.objectPosition,
-              }}
-            />
           </div>
         </section>
       </div>
