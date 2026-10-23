@@ -14,7 +14,7 @@ export function PrimaryNav({ items }: PrimaryNavProps) {
 
   return (
     <nav aria-label="Primary" className="bg-stone-950">
-      <ul className="site-content-gutter grid w-full gap-x-3 gap-y-1 py-3 text-center sm:grid-cols-3 lg:grid-cols-6">
+      <ul className="site-content-gutter grid w-full gap-x-3 gap-y-1 py-3 text-center sm:grid-cols-3 lg:grid-cols-5">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -24,7 +24,7 @@ export function PrimaryNav({ items }: PrimaryNavProps) {
             <li key={item.href} className="sm:flex">
               <Link
                 aria-current={isActive ? 'page' : undefined}
-                className={`heading-section nav-link link-sweep text-hover-accent inline-flex w-full items-center justify-center px-3 py-2 text-sm font-semibold text-stone-50 uppercase sm:min-h-12 ${
+                className={`heading-section nav-link link-sweep text-hover-accent inline-flex w-full items-center justify-center px-3 py-2 text-base font-semibold text-stone-50 uppercase sm:min-h-12 ${
                   isActive ? 'is-active' : ''
                 }`}
                 href={item.href}

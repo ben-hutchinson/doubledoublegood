@@ -471,7 +471,7 @@ button:active,
     }
 
     .gig-ticker__text {
-      @apply whitespace-normal;
+      @apply min-w-0 flex-1 whitespace-normal;
       padding-right: 0;
     }
 

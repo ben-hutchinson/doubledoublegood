@@ -124,7 +124,12 @@ export const headerContent = {
 export const gigTickerContent = {
   enabledMode: getGigTickerEnabledMode(process.env.NEXT_PUBLIC_SHOW_GIG_TICKER),
   eyebrow: 'Shop notice',
-  events: [] satisfies GigTickerEvent[],
+  events: [
+    {
+      message:
+        'IN-STORE GIG - TIRED - SATURDAY 24TH OCTOBER - 4PM - FREE ENTRY',
+    },
+  ] satisfies GigTickerEvent[],
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -133,7 +138,6 @@ export const navigationItems: NavigationItem[] = [
   { href: '/sell', label: 'Sell Your Vinyl' },
   { href: '/contact', label: 'Contact' },
   { href: '/reviews', label: 'Reviews' },
-  { href: '/community', label: 'Community' },
 ];
 
 export const socialLinks: SocialLink[] = [
@@ -418,7 +422,6 @@ export const siteRoutes = [
   '/about',
   '/find-us',
   '/sell',
-  '/community',
   '/contact',
   '/reviews',
   '/delivery-returns',

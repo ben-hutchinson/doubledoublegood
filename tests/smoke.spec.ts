@@ -6,7 +6,7 @@ import {
   bannedMockupValues,
   businessDetails,
   carouselItems,
-  communityContent,
+  footerContent,
   homeWhatWeDo,
   integrationSettings,
   getHeaderOpenStatusBadgeMode,
@@ -97,13 +97,6 @@ test.describe('public routes', () => {
   }) => {
     await page.goto('/');
 
-    const primaryLabels = await page
-      .getByRole('navigation', { name: 'Primary' })
-      .getByRole('link')
-      .allTextContents();
-
-    expect(primaryLabels.at(-1)).toBe('Community');
-
     for (const item of navigationItems) {
       await expect(
         page.getByRole('link', { name: item.label }).first(),
@@ -190,7 +183,7 @@ test.describe('public routes', () => {
     ).toBeVisible();
   });
 
-  test('header keeps the ticker bar after its scrolling message is cleared', async ({
+  test('header ticker shows the approved message with accessible and reduced-motion support', async ({
     page,
   }) => {
     await page.goto('/');
@@ -198,10 +191,45 @@ test.describe('public routes', () => {
     const ticker = page.getByRole('region', {
       name: 'Upcoming in-store shows',
     });
+    const message =
+      'IN-STORE GIG - TIRED - SATURDAY 24TH OCTOBER - 4PM - FREE ENTRY';
 
     await expect(ticker).toBeVisible();
     await expect(ticker.getByText(gigTickerContent.eyebrow)).toBeVisible();
-    await expect(ticker.locator('.gig-ticker__viewport')).toHaveCount(0);
+
+    const announcement = ticker.locator('.sr-only');
+    await expect(announcement).toHaveCount(1);
+    await expect(announcement.getByRole('listitem')).toHaveCount(1);
+    await expect(announcement.getByRole('listitem')).toHaveText(message);
+
+    const viewport = ticker.locator('.gig-ticker__viewport');
+    await expect(viewport).toHaveAttribute('aria-hidden', 'true');
+    await expect(viewport.locator('.gig-ticker__text')).toHaveCount(2);
+    await expect(viewport.locator('.gig-ticker__text')).toHaveText([
+      message,
+      message,
+    ]);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const track = viewport.locator('.gig-ticker__track');
+    const visualCopies = viewport.locator('.gig-ticker__text');
+    await expect(track).toHaveCSS('animation-name', 'none');
+    await expect(visualCopies.first()).toBeVisible();
+    await expect(visualCopies.first()).toHaveText(message);
+    await expect(visualCopies.nth(1)).toBeHidden();
+
+    const availableWidth = await viewport.evaluate(
+      (element) => element.getBoundingClientRect().width,
+    );
+    const messageFit = await visualCopies.first().evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+      width: element.getBoundingClientRect().width,
+    }));
+    const messageWidth = messageFit.width;
+    expect(messageWidth).toBeLessThanOrEqual(availableWidth);
+    expect(messageFit.scrollWidth).toBeLessThanOrEqual(messageFit.clientWidth);
   });
 
   test('open status feature flag switches the header badge to a closed message', () => {
@@ -420,9 +448,6 @@ test.describe('public routes', () => {
     await expect(
       page.getByLabel('Shop image carousel').locator('.media-zoom').first(),
     ).toHaveCSS('border-radius', '19.2px');
-    await expect(
-      page.getByRole('img', { name: aboutContent.ownerImage.alt }),
-    ).toHaveCSS('border-radius', '19.2px');
   });
 
   test('find us page contains the correct facts and directions link', async ({
@@ -449,37 +474,27 @@ test.describe('public routes', () => {
     ).toHaveCount(0);
   });
 
-  test('community page launches with scaffolded copy and no fake entries', async ({
+  test('community route is retired with and without a trailing slash', async ({
     page,
+    request,
   }) => {
-    await page.goto('/community/');
+    for (const route of ['/community', '/community/']) {
+      const response = await request.get(route);
+      expect(response.status()).toBe(404);
+    }
 
+    await page.goto('/');
     await expect(
-      page.getByRole('heading', { name: communityContent.title, level: 1 }),
-    ).toBeVisible();
-    await expect(page.getByText(communityContent.intro)).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: 'Supported bands' }),
+      page
+        .getByRole('navigation', { name: 'Primary' })
+        .getByRole('link', { name: 'Community', exact: true }),
     ).toHaveCount(0);
     await expect(
-      page.getByRole('heading', {
-        name: 'Independent shops',
+      page.locator('footer').getByRole('link', {
+        name: 'Community',
+        exact: true,
       }),
     ).toHaveCount(0);
-    await expect(page.getByRole('link', { name: 'Community' })).toHaveCount(2);
-
-    const bodyText = await page.locator('body').innerText();
-    expect(communityContent.intro).toBe(
-      'COMING SOON! Stay tuned for news on the shop and our wider community.',
-    );
-    expect(bodyText).not.toContain(
-      'Band links are being gathered and will be added here once confirmed.',
-    );
-    expect(bodyText).not.toContain(
-      'Independent shop links are being gathered and will be added here once confirmed.',
-    );
-    expect(bodyText.toLowerCase()).not.toContain('placeholder');
-    expect(bodyText).not.toContain('Example');
   });
 
   test('sell page rotates cropped local vinyl photos in the existing image slot', async ({
@@ -605,53 +620,49 @@ test.describe('public routes', () => {
     ).toHaveCount(1);
   });
 
-  test('about page shows current approved copy and owner section', async ({
+  test('about page shows the shop story and carousel without the owner section', async ({
     page,
   }) => {
     await page.goto('/about/');
 
     await expect(
       page.getByRole('heading', { name: aboutContent.ownerHeading }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
-      page.getByText('Owner story placeholder copy goes here for now.'),
+      page.getByRole('img', { name: aboutContent.ownerImage.alt }),
     ).toHaveCount(0);
 
-    const ownerImage = page.getByRole('img', {
-      name: aboutContent.ownerImage.alt,
-    });
-    const mainBox = await page.locator('main').boundingBox();
-    const imageBox = await ownerImage.boundingBox();
+    const ownerImageFilename = aboutContent.ownerImage.src.split('/').at(-1);
+    await expect(page.locator(`img[src*="${ownerImageFilename}"]`)).toHaveCount(
+      0,
+    );
 
-    await expect(ownerImage).toBeVisible();
-    expect(imageBox?.width).toBeGreaterThan((mainBox?.width ?? 0) * 0.8);
+    await expect(
+      page.getByRole('heading', { name: aboutContent.shopHeading }),
+    ).toBeVisible();
+    await expect(page.getByText(aboutContent.shopParagraphs[0])).toBeVisible();
+    await expect(page.getByLabel('Shop image carousel')).toBeVisible();
   });
 
-  test('newsletter section renders the Beehiiv embed form', async ({
+  test('newsletter section and Beehiiv embed are absent from public pages', async ({
     page,
   }) => {
-    await page.goto('/');
+    for (const route of ['/', '/about/']) {
+      await page.goto(route);
 
-    const beehiivLoader = page.locator('script[data-beehiiv-form]');
-    const newsletterSection = page.locator('#newsletter');
-    const beehiivEmbed = newsletterSection.locator(
-      'iframe[src^="https://subscribe-forms.beehiiv.com"]',
-    );
+      const footer = page.locator('footer');
 
-    await expect(beehiivLoader).toHaveCount(1);
-    await expect(beehiivLoader).toHaveAttribute(
-      'src',
-      integrationSettings.beehiivEmbedScriptUrl,
-    );
-    await expect(beehiivLoader).toHaveAttribute(
-      'data-beehiiv-form',
-      integrationSettings.beehiivFormId,
-    );
-    await expect(beehiivEmbed).toHaveCount(1);
-    await expect(beehiivEmbed).toHaveAttribute(
-      'title',
-      'Join the Double Double Good mailing list',
-    );
+      await expect(page.locator('#newsletter')).toHaveCount(0);
+      await expect(
+        page.getByRole('heading', { name: footerContent.newsletterTitle }),
+      ).toHaveCount(0);
+      await expect(footer.locator('form')).toHaveCount(0);
+      await expect(footer.getByRole('button')).toHaveCount(0);
+      await expect(
+        page.locator('iframe[src^="https://subscribe-forms.beehiiv.com"]'),
+      ).toHaveCount(0);
+      await expect(page.locator('script[data-beehiiv-form]')).toHaveCount(0);
+    }
   });
 
   test('home instagram reel uses the latest requested reel', () => {
@@ -706,5 +717,8 @@ test.describe('public routes', () => {
     for (const route of routes) {
       expect(sitemapBody).toContain(`<loc>${canonicalUrl(route)}</loc>`);
     }
+    expect(sitemapBody).not.toContain(
+      `<loc>${canonicalUrl('/community')}</loc>`,
+    );
   });
 });

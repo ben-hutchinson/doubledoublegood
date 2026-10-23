@@ -4,6 +4,7 @@ import { PageShell } from '@/components/page-shell';
 import { createPageMetadata } from '@/lib/metadata';
 import { communityContent } from '@/lib/site-content';
 
+// Move back to src/app/community/page.tsx to restore this route.
 export const metadata: Metadata = createPageMetadata(
   'Community',
   'Updates about the shop and wider Double Double Good community.',
