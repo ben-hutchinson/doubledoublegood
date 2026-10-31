@@ -667,7 +667,7 @@ test.describe('public routes', () => {
 
   test('home instagram reel uses the latest requested reel', () => {
     expect(integrationSettings.instagramReelEmbedUrl).toBe(
-      'https://www.instagram.com/reel/Delh1EUszLo/embed/',
+      'https://www.instagram.com/reel/DfJp588MC1p/embed/',
     );
   });
 
